@@ -1,0 +1,118 @@
+<link rel="stylesheet" type="text/css" href="ddsmoothmenu.css" />
+<link rel="stylesheet" type="text/css" href="ddsmoothmenu-v.css" />
+
+<script type="text/javascript" src="ddsmoothmenu.js"></script>
+
+
+<script type="text/javascript">
+
+	ddsmoothmenu.init({
+		mainmenuid: "smoothmenu1", //menu DIV id
+		orientation: 'h', //Horizontal or vertical menu: Set to "h" or "v"
+		classname: 'ddsmoothmenu', //class added to menu's outer DIV
+		//customtheme: ["#1c5a80", "#18374a"],
+		contentsource: "markup" //"markup" or ["container_id", "path_to_menu_file"]
+	})
+	
+	ddsmoothmenu.init({
+		mainmenuid: "smoothmenu2", //Menu DIV id
+		orientation: 'v', //Horizontal or vertical menu: Set to "h" or "v"
+		classname: 'ddsmoothmenu-v', //class added to menu's outer DIV
+		method: 'toggle', // set to 'hover' (default) or 'toggle'
+		arrowswap: true, // enable rollover effect on menu arrow images?
+		//customtheme: ["#804000", "#482400"],
+		contentsource: "markup" //"markup" or ["container_id", "path_to_menu_file"]
+	})
+
+
+	</script>
+
+<style>
+
+.input {
+  width: 100%;
+  height:40px;
+}
+a:link {
+  text-decoration: none;
+  
+}
+.btn { color: white; }
+.btn-color-saas95 {
+	background-color: rgb(77, 77, 255);
+}
+.picker-color {
+	background-color: rgb(255, 255, 255); //rgb(210, 210, 210);
+}
+
+.picker-shadow {
+  
+  transform: scale(1,1);
+  -webkit-transform: scale(1,1);
+  -moz-transform: scale(1,1);
+  box-shadow: 0 0px 20px  2px rgba(0,0,0,0.2);
+  -webkit-box-shadow: 0 0px 20px 2px rgba(0,0,0,0.2);
+  -moz-box-shadow: 0 0px 20px 2px rgba(0,0,0,0.2);
+}
+
+.picker-shadow2 {
+	//background-color: #3D668F;
+    //height: 50px;
+    //width: 80px;
+    box-shadow: 0 -2px 15px -2px #232323;
+    -moz-box-shadow: 0 -2px 15px -2px #232323;
+    -webkit-box-shadow: 0 -2px 15px -2px #232323;
+}
+</style>
+<script>
+	$(document).ready(function() {
+    	$(".dropdown-toggle").dropdown();
+	});
+</script>
+
+<center>
+	<p class="logo_font">SaaS95</p>
+	<table cellpadding="5" cellspacing="0" class="picker-shadow">
+		<tr>
+			<td align=center valign="bottom" bgcolor="#eee" class="picker-color" style=" border-top-left-radius: 5px">Open Period</td>
+			<td bgcolor="#eee" class="picker-color"></td>
+			<td align=center valign="bottom" class="picker-color " style="">Close Period</td>
+			<td colspan="4">
+				<div style="text-align:right;width:100%;padding:5px;"><a id="introjs_help" href="javascript:introjs_init();" class="btn-sm btn-success"><i class="fa-solid fa-circle-question"></i></a></div>
+				<input type=text id=cf_slug class="input" placeholder="paste your access key here to use saas95" autocomplete="off" onchange="javascript:trim_whitespace('cf_slug');">
+			</td>
+		</tr>
+		<tr>
+			<td class="picker-color" style="border-bottom-left-radius:5px;"><input type=text id=stbd placeholder="YYYY-MM-DD" value="2022-01-31" class="datepicker number_input" onchange="javascript:check_date();"></td>
+			<td class="picker-color" ><a href="javascript:set_dates_tb();"><i class="fa-solid fa-wand-magic-sparkles"></i></a></td>
+			<td class="picker-color" style=""><input type=text id=etbd placeholder="YYYY-MM-DD" value="2022-04-30" class="datepicker number_input" onchange="javascript:check_date();"></td>
+			<td style="border-bottom-right-radius:5px;">
+				<div id="smoothmenu1" class="ddsmoothmenu">
+				<ul>
+					<li><a href="javascript:reset_home();" id=""><i class="fa-solid fa-house-user"></i> Home</a></li>
+					<li><a href="javascript:load_scf();"  id="introjs_loadrec"><i class="fa-solid fa-trowel-bricks"></i> Load Reconciliation</a></li>
+					<li><a  href="javascript:do_nothing();">Reporting <i class="fa-solid fa-circle-chevron-down"></i></a>
+					<ul>
+						<li><a href="https://saas95.com/app/statement_of_cashflows.model?" onclick="javascript:show_statement(this.href);return false;" >Cashflows</a></li>
+						<li><a href="?p=vtb&" onclick="javascript:show_trial_balance(this.href);return false;">Trial Balance</a></li>
+						<li><a href="javascript:get_keys_for_combination();" >Consolidating SCF</a></li>
+						<li><a href="https://saas95.com/app/matrix_report.model?" onclick="javascript:show_matrix(this.href);return false;">Cashflow Matrix</a></li>
+					</ul>
+					</li>
+					<li><a href="javascript:do_nothing();" id="data_manager">Data <i class="fa-solid fa-circle-chevron-down"></i></a>
+					<ul>
+						<li><a href="javascript:import_tb();"  id="manage_tb"><i class="fa-solid fa-database"></i> Trial Balance DB</a></li>
+						<li><a href="javascript:load_trial_balance();" id="manage_tbm"><i class="fa-solid fa-gear"></i> Account Coding</a></li>
+						<li><a href="javascript:load_scf_captions();"  id="manage_cf_captions"><i class="fa-solid fa-gear"></i> Cashflow Captions</a></li>
+					</ul>
+					</li>
+					<li><a href="javascript:settings();" ><i class="fa-solid fa-gear"></i> Settings</a></li>					
+				</ul>
+				</div>
+			</td>
+		</tr>
+		
+	</table>
+	<BR><BR>
+		
+</center>

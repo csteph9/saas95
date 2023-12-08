@@ -1,0 +1,605 @@
+<HTML>
+
+<title>S95 Cashflows</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/3.0.1/mustache.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/cupertino/jquery-ui.css"/>
+<!-- script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script> -->
+<!-- script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/6.0.0/intro.js" integrity="sha512-iC2jUAfCjQVVR2eGiPYjV2lb7ZIF0Tx3xPj/PdGZSJkSJVz5y+88tRwshNmrso1twhzhSQwBPXNLdAqUYmRAPg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/6.0.0/introjs.css" integrity="sha512-4OzqLjfh1aJa7M33b5+h0CSx0Q3i9Qaxlrr1T/Z+Vz+9zs5A7GM3T3MFKXoreghi3iDOSbkPMXiMBhFO7UBW/g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<script
+  src="https://code.jquery.com/jquery-3.5.1.js"
+  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+  crossorigin="anonymous"></script>
+<script
+  src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"
+  integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30="
+  crossorigin="anonymous"></script>
+<!-- link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/ -->
+<link rel="stylesheet" href="csscf.css"/>
+<script src="cashflow_funcs.js"></script>
+<script src="csv.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lobster&family=Poppins&display=swap" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="ddsmoothmenu.css" />
+<link rel="stylesheet" type="text/css" href="ddsmoothmenu-v.css" />
+<script type="text/javascript" src="ddsmoothmenu.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<script type="text/javascript" src="introjs.js"></script>
+<script type="text/javascript" src="/resource?p=variables"></script>
+
+
+<center>
+        <p class="logo_font">SaaS95</p>
+        <table cellpadding="5" cellspacing="0" class="picker-shadow">
+                <tr>
+                        <td align=center valign="bottom" bgcolor="#eee" class="picker-color" style=" border-top-left-radius: 5px">Open Period</td>
+                        <td bgcolor="#eee" class="picker-color"></td>
+                        <td align=center valign="bottom" class="picker-color " style="">Close Period</td>
+                        <td colspan="4">
+                                <div style="text-align:right;width:100%;padding:5px;"><a id="introjs_help" href="javascript:introjs_init();" class="btn-sm btn-success"><i class="fa-solid fa-circle-question"></i></a></div>
+                                <input type=text id=cf_slug class="input" placeholder="paste your access key here to use saas95" autocomplete="off" onchange="javascript:trim_whitespace('cf_slug');">
+                        </td>
+                </tr>
+                <tr>
+                        <td class="picker-color" style="border-bottom-left-radius:5px;"><input type=text id=stbd placeholder="YYYY-MM-DD" value="2022-01-31" class="datepicker number_input" onchange="javascript:check_date();"></td>
+                        <td class="picker-color" ><a href="javascript:set_dates_tb();"><i class="fa-solid fa-wand-magic-sparkles"></i></a></td>
+                        <td class="picker-color" style=""><input type=text id=etbd placeholder="YYYY-MM-DD" value="2022-04-30" class="datepicker number_input" onchange="javascript:check_date();"></td>
+                        <td style="border-bottom-right-radius:5px;">
+                                <div id="smoothmenu1" class="ddsmoothmenu">
+                                <ul>
+                                        <li><a href="javascript:reset_home();" id=""><i class="fa-solid fa-house-user"></i> Home</a></li>
+                                        <li><a href="javascript:load_scf();"  id="introjs_loadrec"><i class="fa-solid fa-trowel-bricks"></i> Load Reconciliation</a></li>
+                                        <li><a  href="javascript:do_nothing();">Reporting <i class="fa-solid fa-circle-chevron-down"></i></a>
+                                        <ul>
+                                                <li><a href="/report?" onclick="javascript:show_statement(this.href);return false;" >Cashflows</a></li>
+                                                <li><a href="/report?" onclick="javascript:show_trial_balance(this.href);return false;">Trial Balance</a></li>
+                                                <li><a href="javascript:get_keys_for_combination();" >Consolidating SCF</a></li>
+                                                <li><a href="/report?" onclick="javascript:show_matrix(this.href);return false;">Cashflow Matrix</a></li>
+                                        </ul>
+                                        </li>
+                                        <li><a href="javascript:do_nothing();" id="data_manager">Data <i class="fa-solid fa-circle-chevron-down"></i></a>
+                                        <ul>
+                                                <li><a href="javascript:import_tb();"  id="manage_tb"><i class="fa-solid fa-database"></i> Trial Balance DB</a></li>
+                                                <li><a href="javascript:load_trial_balance();" id="manage_tbm"><i class="fa-solid fa-gear"></i> Account Coding</a></li>
+                                                <li><a href="javascript:load_scf_captions();"  id="manage_cf_captions"><i class="fa-solid fa-gear"></i> Cashflow Captions</a></li>
+                                        </ul>
+                                        </li>
+                                        <li><a href="javascript:settings();" ><i class="fa-solid fa-gear"></i> Settings</a></li>
+                                </ul>
+                                </div>
+                        </td>
+                </tr>
+
+        </table>
+        <BR><BR>
+
+</center>
+
+<center>
+	<div id="in-progress" style="height:30px;"></div>
+	<div id="reconcile-form"></div>
+	<div id="detail-form"></div>
+	<div id="main_content"></div>
+	<div id="reconcile-form"></div>
+	<div id=trial_balance></div>
+</center>
+
+<script id="cashflow-recon-detail-table" type="x-tmpl-mustache">
+	<div style="width:80%;background-color:#FAFAFA;" class="top_border right_border left_border bottom_border">
+		<h4>Cashflow reconciliation detail</h4>
+	<table class="table" style="width:80%" border=1>
+		<thead>
+		  <tr>
+			<td>Cashflow Caption</td>
+			<td scope="col">TB Account</td>
+			<td scope="col" align=right>Open Date</td>
+			<td scope="col" align=right>Close Date</td>
+			<td scope="col" align=right>Value</td>
+			<td scope="col" align=right>View</td>
+		  </tr>
+		</thead>
+		<tbody>
+	  {{#recons}}
+		  <tr>
+			<td>{{caption_description}}</td>
+			<td>{{account_caption}}</td>
+			<td align=right><div class="comma">{{open_period}}</div></td>
+			<td align=right><div class="comma">{{close_period}}</div></td>
+			<td align=right><div class="comma">{{rec_value}}</div></td>
+			<td align=right><button type="button" class="btn btn-success" onclick="javascript:show_reconcile('{{account_id}}', '{{open_period}}','{{close_period}}','{{rec_value}}')"><i class="fa-solid fa-hashtag"></i> <i class="fa-solid fa-calculator"></i></button></td>
+		  </tr>
+	  {{/recons}}
+		</tbody>
+	  </table>
+	  <div style="width:100%; text-align:right;">
+	  <a href="javascript:close_detail();" class="btn btn-dark">Close</a>
+	  </div>
+	</div>
+	  <BR><BR>
+
+</script>
+
+<script id="trial-balance-recon" type="x-tmpl-mustache">
+	<table class="table" style="width:80%" border=1>
+	  <thead>
+	    	<tr>
+			<td>Account Caption</td>
+			<td scope="col">Account Type</td>
+			<td scope="col" align=right>{{starting}}</td>
+			<td scope="col" align=right>{{ending}}</td>
+			<td scope="col" align=right><div id=introjs_deltas>Delta</div></td>
+			<td scope="col" align=right>Reconciled</td>
+			<td scope="col" align=center>Status</td>
+			<td></td>
+		</tr>
+	  </thead>
+	  <tbody>
+	{{#tb}}
+		<tr>
+      			<td>{{account_caption}}</td>
+			<td>{{account_type}}</td>
+      			<td align=right><div class="comma">{{starting}}</div></td>
+			<td align=right><div class="comma">{{ending}}</div></td>
+			<td align=right><div class="comma">{{delta}}</div></td>
+			<td align=right><div class="comma">{{reconciled}}</div></td>
+
+			{{#reconciliation_complete}}
+			
+			<td align=center valign=middle><i class="fa-solid fa-check"></i></td>
+			<td><button id="introjs_recbutton" type="button" class="btn btn-success" onclick="javascript:show_reconcile('{{id}}', '{{start_date}}','{{end_date}}','{{delta}}')"><i class="fa-solid fa-hashtag"></i> <i class="fa-solid fa-calculator"></i></button></td>
+			
+			{{/reconciliation_complete}}
+			{{^reconciliation_complete}}
+			
+			<td align=center valign=middle><i class="fa-solid fa-x"></i></td>
+			<td><button id="introjs_recbutton" type="button" class="btn btn-danger" onclick="javascript:show_reconcile('{{id}}', '{{start_date}}','{{end_date}}','{{delta}}')"><i class="fa-solid fa-hashtag"></i> <i class="fa-solid fa-calculator"></i></button></td>
+			
+			{{/reconciliation_complete}}
+
+			
+    		</tr>
+	{{/tb}}
+	{{^tb}}
+		<tr>
+			<td colspan=7>No trial balances found.</td>
+		</tr>
+	{{/tb}}
+  	</tbody>
+	</table>
+</script>
+
+<script id="recform" type="x-tmpl-mustache">
+<div style="width:80%;background-color:#eee;" class="top_border right_border left_border bottom_border">
+<table class=table >
+<tr>
+        <td colspan=2>
+			<div id="account_name" class="effect8">
+				<h2>{{account_name}}</h2>
+			</div>
+		</td>
+		<input type=hidden id="account_id_{{account_id}}">
+</tr>
+<tr>
+	<td>Opening Balance</td>
+        <td align=right><div id=open_balance class="comma">{{open_balance}}</div></td>
+</tr>
+<tr>
+        <td>Closing Balance</td>
+        <td align=right><div id=closing_balance class="comma">{{close_balance}}</div></td>
+</tr>
+<tr>
+        <td>Delta to reconcile</td>
+        <td align=right><div id=delta class="comma">{{delta}}</div></td>
+</tr>
+<tr>
+        <td>Differences reconciled</td>
+        <td align=right class=subtotal><div id=reconciled_difference class="comma">{{ reconciled_difference }}</div></td>
+</tr>
+<tr>
+        <td>Remaining unreconciled</td>
+        <td align=right class=foot ><div class=foot id=unreconciled_difference class="comma">{{ uncreconciled_difference }}</div></td>
+</tr>
+</table>
+<BR><BR>
+<div style="width:100%;text-align:left;border:1px;">
+<b>Reconcile account difference:</b><BR>
+</div>
+<table id=recitems class=table style="width:100%;">
+<tr>
+        <td width=50% bgcolor="#ddd">Cashflow Caption</td>
+		<td bgcolor="#ddd" align=center>Start Period</td>
+		<td bgcolor="#ddd" align=center>Close Period</td>
+        <td align=center bgcolor="#ddd">Amount</td>
+		<td align=center>Remove</td>
+</tr>
+{{#recdata}}
+<tr>
+	<td>
+		
+			<input type=text size=50 id="{{ var_name }}_name" name="{{ var_name }}_name" disabled value="{{ caption }}">
+	</td>
+	<td align=center><input class="number_input " size=10 type=text disabled id="{{ var_name }}_open_period" value="{{ open_period }}"></td>
+	<td align=center><input class="number_input " size=10 type=text disabled id="{{ var_name }}_close_period" value="{{ close_period }}"></td>
+	<td align=center><input class="number_input " style="align:center;" size=10 type=text id="{{ var_name }}_value" name="{{ var_name }}_value" value="{{ rec_value }}" placeholder="0.00" onChange='javascript:update_rec(this);'> <a href='javascript:show_note("{{ caption }}");''><i class="fa-regular fa-note-sticky"></i></a></td>
+	<td align=center><a href="javascript:delete_row({{ id }});" class="btn btn-danger btn-sm">x</a></td>
+</tr>
+{{/recdata}}
+</table>
+
+<BR><BR>
+<div style="width:100%; text-align:right;">
+	<button onClick="javascript:insert_row();" class="btn btn-primary">Add SCF Line</button>
+	<a href="javascript:close_rec();" class="btn btn-dark">Close</a>
+	<button onClick="javascript:save_rec();" class="btn btn-success">Save</button>
+</div>
+<BR>
+
+</div>
+<BR><BR>
+</script>
+
+
+
+<script id="trial-balance-tmpl" type="x-tmpl-mustache">
+	<a href="javascript:download_trial_balance_coding();" class="btn btn-primary"><i class="fa-solid fa-download"></i> Download Coding CSV</a>
+	<a href="javascript:upload_trial_balance_coding();" class="btn btn-primary"><i class="fa-solid fa-upload"></i> Upload Coding CSV</a>
+	<BR><BR>
+	<table class="table" id=trial_balance_coding style="width:50%" border=1>
+	  <thead>
+	    <tr>
+	      <th scope="col">Account Caption</th>
+	      <th scope="col"><div id=introjs_tbm>Account Type</div></th>
+		  <th scope="col">Remove</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	{{#account_list}}
+	<tr>
+      		<td>{{account_caption}}</td>
+      		<td>
+			<select class="form-select" onchange="javascript:set_account_type({{id}}, this.value)">
+	  			<option selected>{{account_type}}</option>
+  				<option>cash</option>
+  				<option>assets</option>
+				<option>contra assets</option>
+  				<option>liabilities</option>
+				<option>contra liabilities</option>
+				<option>equity</option>
+				<option>contra equity</option>
+				<option>retained earnings</optionn>
+				<option>revenue</option>
+				<option>expense</option>
+			</select>
+		</td>
+		<td align=center><a href="javascript:delete_account({{id}});" class='btn btn-danger'><i class="fa-solid fa-xmark"></i></a></td>
+    	</tr>
+	{{/account_list}}
+  	</tbody>
+	</table>
+</script>
+<script id="scf-caption-template" type="x-tmpl-mustache">
+	<a href="javascript:add_new_caption();" class="btn btn-primary"><i class="fa-solid fa-circle-plus"></i> Add New Caption</a>&nbsp;&nbsp;
+	<a href="javascript:exportTableToCSV('scf_captions', 'scf_captions.csv');" class="btn btn-dark"><i class="fa-solid fa-file-csv"></i> Download</a>&nbsp;&nbsp;
+	<a href="javascript:upload_captions();" class="btn btn-primary"><i class="fa-solid fa-upload"></i> Upload Captions CSV</a>
+	<BR><BR>
+	<table class="table" style="width:50%" border=1 id=scf_captions>
+	  <thead>
+	    <tr>
+	      <th scope="col"><div id=introjs_scf>caption_description</div></th>
+	      <th scope="col"><div id=introjs_scf_section>section_type</div></th>
+		  <th scole="col"># Use</th>
+		  <th scope="col">Action</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	{{#.}}
+	<tr>
+      		<td>{{caption_description}}</td>
+      		<td>
+			
+		  		{{section_type}}
+
+			</select>
+		</td>
+		<td align=right>
+			{{used_count}}
+		</td>
+		<td>
+				<a href="javascript:edit_caption({{id}});" class='btn btn-success'><div id=introjs_scf_section_edit ><i class="fa-solid fa-pen-to-square"></i></div></a>
+				<a href="javascript:delete_caption({{id}}, '{{used_count}}');" class='btn btn-danger'><div id=introjs_scf_section_delete><i class="fa-solid fa-xmark"></i></div></a>
+		</td>
+    </tr>
+	{{/.}}
+  	</tbody>
+	</table>
+</script>
+
+<script  id="edit-caption" type="x-tmpl-mustache">
+	<table>
+    <tr>
+        <td>Caption label</td>
+        <td><input type="text" id="caption_description" value="{{caption_description}}"></td>
+    </tr>
+    <tr>
+        <Td>Cashflow Section</Td>
+        <td>
+            <select id="section_type">
+				<option>{{section_type}}</option>
+                <option>change in operating accounts</option>
+                <option>non-cash adjustment</option>
+                <option>investing</option>
+                <option>financing</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2"><a href="javascript:save_edit_caption({{id}});" class="btn btn-success">Save</a></td>
+    </tr>
+</table>
+</script>
+
+<script id="new-caption" type="x-tmpl-mustache">
+	<table>
+    <tr>
+        <td>Caption label</td>
+        <td><input type="text" id="caption_description"></td>
+    </tr>
+    <tr>
+        <Td>Cashflow Section</Td>
+        <td>
+            <select id="section_type">
+				<option>operating reconciliation</option>
+                <option>change in operating accounts</option>
+                <option>non-cash adjustment</option>
+                <option>investing</option>
+                <option>financing</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2"><a href="javascript:save_new_caption();" class="btn btn-success">Add</a></td>
+    </tr>
+</table>
+</script>
+<script id="import-trial-balance" type="x-tmpl-mustache">
+	<form enctype="multipart/form-data" method="post" action="/file" >
+
+	<div style="width:40%">
+	<table cellspacing="20">
+	<tr>
+		<td>Select CSV Trial Balance</td>
+		<td><input type=file id=file_name></td>
+	</tr>
+	<tr>
+		<td>Trial Balance Close Date</td>
+		<td><input class="number_input datepicker" type=text id=date placeholder="YYYY-MM-DD" autocomplete="off"></td>
+	</tr>
+	<tr>
+		<td colspan=2><a href="javascript:uploadFile('trial_balance');" class="btn btn-success">Upload</a></td>
+	</tr>
+	</table>
+	CSV column definition:
+        <table>
+        </table>
+
+	</div>
+
+	</form>
+
+</script>
+<script id="upload-scf-captions" type="x-tmpl-mustache">
+	<form enctype="multipart/form-data" method="post" action="?" >
+
+	<div style="width:40%">
+	<table cellspacing="20">
+	<tr>
+		<td>Select CSV caption file to load:</td>
+		<td><input type=file id=file_name></td>
+	</tr>
+	<tr>
+		<td colspan=2><a href="javascript:uploadFile('scf_captions');" class="btn btn-success">Upload</a></td>
+	</tr>
+	</table>
+	</div>
+
+	</form>
+	<BR><BR>
+		<div style="width:20%">
+		
+			<b>Required CSV format:</b>
+			<BR><BR>
+			<b>Columns (header names have to match exactly):</b>
+			<ul class="list-group">
+				<li class="list-group-item">Column A header name: caption_description</li>
+				<li class="list-group-item">Column B header name: section_type</li>
+			</ul>
+			<BR><BR>
+			<b>Available section types:</b>
+			<ul class=list-group>
+				<li class="list-group-item">operating reconciliation</li>
+				<li class="list-group-item">change in operating accounts</li>
+				<li class="list-group-item">non-cash adjustment</li>
+				<li class="list-group-item">investing</li>
+				<li class="list-group-item">financing</li>
+			</ul>
+		
+		
+	</div>
+
+</script>
+<script id="upload-trial-balance-coding" type="x-tmpl-mustache">
+	<form enctype="multipart/form-data" method="post" action="" >
+
+	<div style="width:40%">
+	<table cellspacing="20">
+	<tr>
+		<td>Select Trial Balance Coding file to load</td>
+		<td><input type=file id=file_name></td>
+	</tr>
+	<tr>
+		<td colspan=2><a href="javascript:uploadFile('trial_balance_coding');" class="btn btn-success">Upload</a></td>
+	</tr>
+	</table>
+	</div>
+
+	</form>
+
+</script>
+<script id="please-wait" type="x-tmpl-mustache">
+	
+	<div style="width:10%;">
+		<div class="spinner-border text-success" role="status">
+			<span class="sr-only">Loading...</span>
+  		</div>
+	
+	</div>
+</script>
+
+<script id="periods-posted" type="x-tmpl-mustache">
+	
+	<BR><BR>
+	<table class="table">
+	  <thead>
+	    <tr>
+	      <th scope="col">Periods Posted (download at Reporting->Trial Balance):</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	{{#.}}
+	<tr>
+      		<td>{{period_date}}
+				<a href="javascript:set_open_date('{{period_date}}')" class="btn btn-sm btn-success">Set as open</a>
+				<a href="javascript:set_close_date('{{period_date}}');" class="btn btn-sm btn-success">Set as close</a>
+				<a href="javascript:delete_tb_entries('{{period_date}}')" class="btn btn-sm btn-danger">Delete</a>
+			</td>
+    </tr>
+	{{/.}}
+
+	{{^.}}
+	<tr>
+		<td>No trial balances loaded</td>
+	</tr>
+	{{/.}}
+
+
+  	</tbody>
+	</table>
+</script>
+
+<script id="periods-posted-pop-up" type="x-tmpl-mustache">
+	
+	<BR><BR>
+	<table class="table">
+	  <thead>
+	    <tr>
+	      <th scope="col">Periods Posted:</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	{{#.}}
+	<tr>
+      		<td>{{period_date}}
+				<a href="javascript:set_open_date('{{period_date}}')" class="btn btn-sm btn-success">Set as open</a>
+				<a href="javascript:set_close_date('{{period_date}}');" class="btn btn-sm btn-success">Set as close</a>
+			</td>
+    </tr>
+	{{/.}}
+
+	{{^.}}
+	<tr>
+		<td>No trial balances loaded</td>
+	</tr>
+	{{/.}}
+
+
+  	</tbody>
+	</table>
+</script>
+
+<script id="settings" type="x-tmpl-mustache">
+	
+	<BR><BR>
+	<a href="javascript:download_all();" class="btn btn-sm btn-primary" style="width:300px;"><i class="fa-solid fa-download"></i> <div id=settings_download>Download Backup File</div></a>
+	<BR><BR><BR><BR>
+	<a href="javascript:restore_all();" class="btn btn-sm btn-success" style="width:300px"><i class="fa-solid fa-upload"></i> <div id=settings_restore>Restore from Backup File</div></a>
+	<BR><div id=upload_restore style="width:300px;"></div>
+	<BR><BR><BR>
+	<a href="javascript:purge();" class="btn btn-sm btn-danger" style="width:300px"><i class="fa-solid fa-trash"></i> <div id=settings_delete_all_data>Delete All Data</div></a>
+
+</script>
+
+
+<script id="restore-backup" type="x-tmpl-mustache">
+	<form enctype="multipart/form-data" method="post" action="?" >
+
+	<div style="border:dotted;">
+	<table cellspacing="20">
+	<tr>
+		<td>Select Backup file to restore</td>
+	</tr>
+	<tr>
+		<td><input type=file id=file_name></td>
+	</tr>
+	<tr>
+		<td colspan=2><a href="javascript:uploadFile('restore');" class="btn btn-success">Upload</a></td>
+	</tr>
+	</table>
+	</div>
+
+	</form>
+</script>
+<script id="get-keys-for-combination" type="x-tmpl-mustache">
+	<div style="width:50%">
+	<table class=table id=key_combine_table>
+		<tr>
+			<td>List keys, separated by commas</td>
+			<td><input class="input-control" id=combine_keys size=70 onchange="javascript:trim_whitespace('combine_keys');"></td>
+		</tr>
+	</table>
+	<a class="btn btn-primary" href="/report?" onclick="javascript:show_combined_scf(this.href);return false;">View Consolidating SCF</a>
+	</div>	
+
+</script>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+	  <div class="modal-content">
+		<div class="modal-header">
+		  <h5 class="modal-title" id="exampleModalLabel">Trial Balance Periods Loaded</h5>
+		  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		</div>
+		<div class="modal-body">
+		  <div id="set_dates_tb"></div>
+		</div>
+		
+	  </div>
+	</div>
+  </div>
+  <div class="modal fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true" >
+	<div class="modal-dialog" >
+	  <div class="modal-content">
+		<div class="modal-header">
+		  <h5 class="modal-title" id="exampleModalLabel">Reconciliation Notes</h5>
+		  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		</div>
+		<div class="modal-body">
+		  <div>
+			<textarea class="form-control"  id=reconciliation_notes_text></textarea>
+			<a href="javascript:save_note();" class="btn btn-success">Save</a>
+		  </div>
+		</div>
+		
+	  </div>
+	</div>
+  </div>
+
+
+</HTML>

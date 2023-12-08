@@ -1,0 +1,240 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html>
+<meta charset="ANSI">  
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+<script
+  src="https://code.jquery.com/jquery-3.5.1.js"
+  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+  crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="csv.js"></script>
+<script>
+
+function numberWithCommas(x) {
+    
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+$(document).ready(function(){
+    $('.comma').each(function(obj) {
+	    $(this).html(numberWithCommas($(this).html()));
+    });
+
+
+});
+
+</script>
+<style>
+
+a {
+  outline: none;
+  text-decoration: none;
+  //padding: 0px 0px 0;
+  //font-family: "FontAwesome",
+  color:#000;
+  background: #FFF;
+  //font-weight: bold;
+  //content: "\f14c";
+  font-size:5px;
+}
+
+.top_border {
+  border-top: 2px solid black;
+}
+.bottom_border {
+  //border-bottom: 2px solid black;
+}
+.double_bottom {
+
+    border-bottom: double;
+}
+</style>
+
+
+<title>Statement of Cashflows</title>
+<center>
+<h3>Cashflow as of <%= close_period %></h3>
+<h4>starting <%= open_period %><h4>
+<a href="javascript:location.reload();" class="btn btn-success"> <i class="fa-solid fa-arrows-rotate"></i>Refresh</a>
+<a href="javascript:exportTableToCSV('cashflow_table', 'cashflow.csv');" class="btn btn-dark"><i class="fa-solid fa-file-csv"></i> Download</a>
+<BR><BR>
+<table border=0 cellspacing=2 cellpadding=2 class="table table-striped" style="border-right: thin;" id=cashflow_table>
+
+<tr>
+        <td>Accounts</td><td>SCF</td>
+
+
+<% for ( i in capar ) { %>
+    <td style="border-right:solid;"><%= capar[i] %></td>
+
+<% } %>
+
+</tr>
+
+<tr>
+        <td colspan=2>Opening Balances</td>
+
+<% for ( i in capar ) { 
+	let acct = capar[i];
+%>
+    	<td align=right style="border-right:solid;"><div class="comma"><%= matrix_rec[acct].starting %></div></td>
+<% } %>
+
+</tr>
+<tr>
+        <td colspan=2>Closing Balances</td>
+
+<% for ( i in capar ) { 
+	let acct = capar[i];
+%>
+
+    <td align=right style="border-right:solid;"><div class="comma"><%= matrix_rec[acct].ending %></div></td>
+
+<% } %>
+
+</tr>
+<tr>
+        <td colspan=2>Deltas to reconcile</td>
+
+<% for ( i in capar ) { 
+	let acct = capar[i];
+%>
+    	<td align=right style="border-right:solid;"><div class="comma"><%= matrix_rec[acct].delta %></div></td>
+<% } %>
+
+</tr>
+
+<tr><td height=30 colspan=<%= capar.length + 2 %> ></td></tr>
+<tr>
+	<td>Net income</td>
+	<td align=right><div class="comma"><%= net_income %></div></td>
+</tr>
+<tr><td height=30 colspan=<%= capar.length + 2 %> ></td></tr>
+
+
+<tr><td colspan=<%= capar.length + 2 %>><b>Adjustments to reconcile net loss to net cash (used in) provided by operating activities:</b></td></tr>
+
+<% let sc = 0; %>
+<% for( i in scf['operating_reconciliation'] ) { 
+sc++;
+%>
+    <tr>
+	<td><%= scf['operating_reconciliation'][i].caption_description %></td>
+     	<td align=right><div class="comma"><%= scf['operating_reconciliation'][i].amount %></div></td>
+
+    <% for( e in capar) { %>
+        <td align=right style="border-right:solid;"><%= rt[ scf['operating_reconciliation'][i].caption_description ][ capar[e] ] %></td>
+    <% } %>
+
+    </tr>
+<% } %>
+
+<tr>
+	<td colspan=<%= capar.length + 2 %> >&nbsp;<i>Changes in operating assets and liabilities:</i></td></td>
+</tr>
+
+<% for( i in scf['change_in_operating_accounts']) { %>
+
+    <tr>
+	<td>&nbsp;&nbsp;<%= scf['change_in_operating_accounts'][i].caption_description %></td>
+    	<td align=right><div class="comma"><%= scf['change_in_operating_accounts'][i].amount %></div></td>
+    
+	 <% for( e in capar) { %>
+        	<td align=right style="border-right:solid;"><div class="comma"><%= rt[ scf['change_in_operating_accounts'][i].caption_description ][ capar[e] ] %></div></td>
+	
+	<% } %>
+   </tr>
+<% } %>
+
+
+
+
+<tr>
+	<td>&nbsp;&nbsp;&nbsp;Net cash provided by (used in) operating activities</td>
+	<td align=right class=""><div class="comma"><%= scf.net_cashflows_from_operations %></div></td>
+</tr>
+
+
+<tr>
+	<td colspan=<%= capar.length + 2%> ><b>Cash flows from investing activities:</b></td></td>
+</tr>
+<% for( i in scf['investing']) { %>
+
+    	<tr>
+		<td>&nbsp;<%= scf['change_in_operating_accounts'][i].caption_description %></td>
+		<td align=right><div class="comma"><%= scf['investing'][i].amount %></div></td>
+	<% for( e in capar) { %>
+    	
+        	<td align=right style="border-right:solid;"><div class="comma"><%= rt[ scf['investing'][i].caption_description ][ capar[e] ] %></div></td>
+    	<% } %>
+	</tr>
+<% } %>
+
+<tr>
+	<td>&nbsp;&nbsp;Net cash provided by (used in) investing activities</td>
+	<td align=right class="top_border bottom_border"><div class="comma"><%= scf.cashflow_from_investing %></div></td>
+</tr>
+
+<tr>
+	<td colspan=<%= capar.length + 2 %> ><b>Cash flows from financing activities:</b></td></td>
+</tr>
+<% for( i in scf['financing']) { %>
+
+<tr>
+	<td>&nbsp;<%= scf['financing'][i].caption_description %></td>
+	<td align=right><div class="comma"><%= scf['financing'][i].amount %></div></td>
+	
+   	<% for( e in capar) { %>
+                <td align=right style="border-right:solid;"><div class="comma"><%= rt[ scf['financing'][i].caption_description ][ capar[e] ] %></div></td>
+        <% } %>
+</tr>
+ 
+<% } %>
+
+<tr>
+	<td>&nbsp;&nbsp;Net cash provided by (used in) financing activities</td>
+	<td align=right class="top_border bottom_border"><div class="comma"><%= scf.cashflows_from_financing %></div></td>
+</tr>
+
+<tr><td height=30></td></tr>
+    <tr>
+        <td>Change in cash</td>
+        <td align=right><div class="comma"><%= scf.change_in_cash %></div></td>
+    </tr>
+    <tr>
+        <td colspan="" height=30></td>
+    </tr>
+    <tr>
+        <td>Beginning of period</td>
+        <td align=right><div class="comma"><%= scf.beginning_period_cash %></div></td>
+    </tr>
+    <tr>
+        <td>End of period</td>
+        <td align=right class="top_border double_bottom"><div class="comma"><%= scf.ending_period_cash %></div></td>
+
+<tr><td colspan=$td_count><b>Non-cash adjustments:</b></td></td>
+
+
+
+<% for( i in scf['non_cash_adjustments']) { %>
+
+        <tr><td>&nbsp;<%= scf['non_cash_adjustments'][i].caption_description %></td>
+        <td align=right><div class="comma"><%= scf['non_cash_adjustments'][i].amount %></div></td>
+
+        <% for( e in capar) { %>
+                <td align=right style="border-right:solid;"><div class="comma"><%= rt[ scf['non_cash_adjustments'][i].caption_description ][ capar[e] ] %></div></td>
+        <% } %>
+
+        </tr>
+
+<% } %>
+
+   
+</table>
+</center>
+
+</HTML>
