@@ -13,7 +13,7 @@ The Statement of Cashflows is arguably the most complicated statement to prepare
 SaaS95 addresses the preparation of this statement in a structured way that allows flexibility and bypasses the spreadsheet. A great analogy would be bowling with and without bumpers. SaaS95 gives practitioners bumper rails when preparing their Statement of Cashflows. Preparation becomes trivial with bumpers.
 
 # Licensing
-SaaS95 is licensed under the Creative Commons Non-Commercial 4.0 deed. Practitioners and their teams are free to download, implement, modify, redistribute, and benefit from SaaS95. SaaS95 shall not be exploited by services, however, for commercial hosting endeavors. Expertise-based consulting and implementation services are outside the scope of SaaS95’s license.
+SaaS95 is licensed under the [Creative Commons Non-Commercial 4.0 deed](https://creativecommons.org/licenses/by-nc/4.0/deed.en). Practitioners and their teams are free to download, implement, modify, redistribute, and benefit from SaaS95. SaaS95 shall not be exploited by services, however, for commercial hosting endeavors. Expertise-based consulting and implementation services are outside the scope of SaaS95’s license.
 
 # Installation
 SaaS95 is built using NodeJS and Mysql (or MariaDB).
