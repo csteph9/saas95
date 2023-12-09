@@ -1,3 +1,5 @@
+// SaaS95 Copyright © 2023 by Caleb Stephens
+
 var starting_difference = 0;
 var reconciled_difference = 0;
 var unreconciled_difference = 0;
