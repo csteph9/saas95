@@ -20,7 +20,7 @@ SaaS95 is built using NodeJS and Mysql (or MariaDB).
 
 Download and install [NodeJS](https://nodejs.org/en/).
 
-Download and install [MariaDB](https://mariadb.com/downloads/). Make sure you set your root user's password. You'll need it for subsequent steps.
+Download and install [MariaDB](https://mariadb.com/downloads/). Make sure you set & remember your root password. You'll need it for subsequent steps.
 
 [Download](https://github.com/csteph9/saas95/archive/refs/heads/main.zip) the SaaS95 code base from GitHub, or clone the repo using [git](https://git-scm.com/downloads)
 
