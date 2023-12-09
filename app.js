@@ -1,4 +1,4 @@
-SaaS95 © 2023 by Caleb Stephens
+SaaS95 Copyright © 2023 by Caleb Stephens
 
 const mysql = require('mysql2/promise');
 const express = require('express')
