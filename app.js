@@ -1,3 +1,5 @@
+SaaS95 © 2023 by Caleb Stephens
+
 const mysql = require('mysql2/promise');
 const express = require('express')
 const app = express()
