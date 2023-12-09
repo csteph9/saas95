@@ -66,5 +66,5 @@ $ npm run app
 SaaS95 running; view at localhost:3000/main.html
 ```
 
-See the Getting Started User guide [here](https://saas95.com/getting_started.pl)
+See the Getting Started User guide [here](https://saas95.com/getting_started.pl).
 
