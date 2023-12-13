@@ -33,25 +33,25 @@ $(document).ready(function(){
 		introjs_init();
 	}
 
-	 ddsmoothmenu.init({
-                mainmenuid: "smoothmenu1", //menu DIV id
-                orientation: 'h', //Horizontal or vertical menu: Set to "h" or "v"
-                classname: 'ddsmoothmenu', //class added to menu's outer DIV
-                //customtheme: ["#1c5a80", "#18374a"],
-                contentsource: "markup" //"markup" or ["container_id", "path_to_menu_file"]
-        })
+	ddsmoothmenu.init({
+		mainmenuid: "smoothmenu1", //menu DIV id
+		orientation: 'h', //Horizontal or vertical menu: Set to "h" or "v"
+		classname: 'ddsmoothmenu', //class added to menu's outer DIV
+		//customtheme: ["#1c5a80", "#18374a"],
+		contentsource: "markup" //"markup" or ["container_id", "path_to_menu_file"]
+	});
 
-        ddsmoothmenu.init({
-                mainmenuid: "smoothmenu2", //Menu DIV id
-                orientation: 'v', //Horizontal or vertical menu: Set to "h" or "v"
-                classname: 'ddsmoothmenu-v', //class added to menu's outer DIV
-                method: 'toggle', // set to 'hover' (default) or 'toggle'
-                arrowswap: true, // enable rollover effect on menu arrow images?
-                //customtheme: ["#804000", "#482400"],
-                contentsource: "markup" //"markup" or ["container_id", "path_to_menu_file"]
-        })
+	ddsmoothmenu.init({
+		mainmenuid: "smoothmenu2", //Menu DIV id
+		orientation: 'v', //Horizontal or vertical menu: Set to "h" or "v"
+		classname: 'ddsmoothmenu-v', //class added to menu's outer DIV
+		method: 'toggle', // set to 'hover' (default) or 'toggle'
+		arrowswap: true, // enable rollover effect on menu arrow images?
+		//customtheme: ["#804000", "#482400"],
+		contentsource: "markup" //"markup" or ["container_id", "path_to_menu_file"]
+	});
 
-
+	reset_home();
 
 
 });
@@ -78,7 +78,7 @@ function getCookie(cname) {
 function populate_detail(id, open, close)
 {
 	console.log("opener");
-	do_post('ajax.model',{'p':'gcd', 'id': id, 'open_period': open, 'close_period': close}, function(data) {
+	do_post('server',{'p':'gcd', 'id': id, 'open_period': open, 'close_period': close}, function(data) {
 		var template = $('#cashflow-recon-detail-table').html();
     		Mustache.parse(template);   
 		var rendered = Mustache.render(template,{recons:data});
@@ -131,33 +131,19 @@ function do_post(url,ps, cb){
 	if( ps.access_slug === '')
 	{
 
-		alert("Access key does not exist.");
+		alert("Access key blank.");
 		stop_inprogress();
+
 	} else {
 		
-		$.get('//'+site_url+ ':' + port + '/app', {'p': 'ck_slug', 'access_slug': ps.access_slug}, function(data){
-
-
-			if(data.slug_status !== 0)
+		$.get('//' +site_url + ':' + port + '/app', ps, function(data){
+			stop_inprogress();
+			if( data.error == 1)
 			{
-
-				$.get('//' +site_url + ':' + port + '/app', ps, function(data){
-					stop_inprogress();
-					if( data.error == 1)
-					{
-						alert(data.error_message);
-					} else {
-						cb(data);
-					}
-				});
-
+				alert(data.error_message);
 			} else {
-				
-				alert("Access key does not exist. Please confirm access key.");
-				stop_inprogress();
-
+				cb(data);
 			}
-
 		});
 
 	}
@@ -168,18 +154,17 @@ function do_post(url,ps, cb){
 function get_cashflow_els(cb)
 {
 
-	do_post('ajax.model',{p:'gcfels'}, function( data ){
-		
-        	cfels = data;
+	do_post('server',{p:'gcfels'}, function( data ){
+		cfels = data;
 		cb(data);
-    	});
+	});
 
 
 }
 
 function download_all()
 {
-		window.location.href="file?p=ead&access_slug=" + $('#cf_slug').val();
+	window.location.href="file?p=ead&access_slug=" + $('#cf_slug').val();
 }
 
 function restore_all()
@@ -197,8 +182,8 @@ function get_current_reconciliation_total()
 	var ps = {
 		p:"get_current_reconciliation", open_period: open_period, close_period: close_period
 	};
-	console.log(ps);
-	do_post('ajax.model',ps,function(data){
+	
+	do_post('server',ps,function(data){
 		console.log(data);
 	});
 
@@ -210,7 +195,7 @@ function settings()
 	reset_home();
 	introjs_page = 'settings';
 	var template = $('#settings').html();
-    	Mustache.parse(template);   
+	Mustache.parse(template);   
 	var rendered = Mustache.render(template);
 	$('#main_content').html(rendered);
 
@@ -219,7 +204,7 @@ function settings()
 function add_new_caption()
 {
 	var template = $('#new-caption').html();
-    	Mustache.parse(template);   
+	Mustache.parse(template);   
 	var rendered = Mustache.render(template);
 	$('#main_content').html(rendered);
 
@@ -239,7 +224,7 @@ function set_close_date(date)
 
 function delete_tb_entries(date)
 {
-	do_post('ajax.model',{p:'dtbe', period:date}, function(data){
+	do_post('server',{p:'dtbe', period:date}, function(data){
 		import_tb();
 	});
 }
@@ -250,12 +235,12 @@ function import_tb()
 	introjs_page = 'import_tb';
 	close_rec();
 	var template = $('#import-trial-balance').html();
-    	Mustache.parse(template);   
+	Mustache.parse(template);   
 	var tb_upload = Mustache.render(template);
 
-	do_post('ajax.model',{p:"gpp"},function(data){
+	do_post('server',{p:"gpp"},function(data){
 		var template = $('#periods-posted').html();
-    		Mustache.parse(template);   
+		Mustache.parse(template);   
 		var periods_posted = Mustache.render(template, data);
 		$('#main_content').html(tb_upload + "<div style='width:50%'>" + periods_posted + "</div>");
 		$( ".datepicker" ).datepicker({ dateFormat: 'yy-mm-dd' });
@@ -292,7 +277,7 @@ function show_note(caption)
 		p:"get_note", account_id: account_id, open_period: open_period, close_period: close_period, note_caption: caption
 	};
 	console.log(ps);
-	do_post('ajax.model',ps, function(data){
+	do_post('server',ps, function(data){
 		$('#reconciliation_notes_text').val(data.note_text);
 		myModal.show();
 	});
@@ -303,7 +288,7 @@ function show_note(caption)
 function save_note()
 {
 	note_modal.hide();
-	do_post('ajax.model',{p:"scfn", account_id: account_id, open_period: open_period, close_period: close_period, note_caption: note_caption, reconciliation_text: $('#reconciliation_notes_text').val()},function(data){
+	do_post('server',{p:"scfn", account_id: account_id, open_period: open_period, close_period: close_period, note_caption: note_caption, reconciliation_text: $('#reconciliation_notes_text').val()},function(data){
 	});
 
 }
@@ -318,10 +303,10 @@ function get_rec_data()
 		'close_period': close_period
 	};
 
-	do_post('ajax.model',ps, function( data ){
+	do_post('server',ps, function( data ){
 		starting_difference = data.delta;
-	        populate_rec_table( data );
-    	});
+		populate_rec_table( data );
+	});
 
 }
 
@@ -366,7 +351,7 @@ function populate_rec_table( recdata )
 function update_rec_table( reconciled_difference, unreconciled_difference )
 {
 	document.getElementById('reconciled_difference').innerHTML = reconciled_difference ;
-    	document.getElementById('unreconciled_difference').innerHTML = unreconciled_difference ;
+	document.getElementById('unreconciled_difference').innerHTML = unreconciled_difference ;
 	
 }
 
@@ -377,7 +362,7 @@ function delete_row( row_num  )
 		'p': "dr",
 		'id': row_num
 	};
-	do_post('ajax.model',ps,function( data ){
+	do_post('server',ps,function( data ){
 		update_rec();
 		get_rec_data();
 	});
@@ -481,7 +466,7 @@ function save_rec()
 	
 	
 
-	do_post('ajax.model',p, function( data ){
+	do_post('server',p, function( data ){
 		
 		$('#reconcile-form').html("");
 		account_id = '';
@@ -503,7 +488,7 @@ function save_new_caption()
 		section_type: $('#section_type').val()
 	};
 	
-	do_post('ajax.model',ps,function(data){
+	do_post('server',ps,function(data){
 	
         	load_scf_captions();
 
@@ -514,7 +499,7 @@ function purge()
 {
 	if(confirm("This will delete all data stored on this access key. Continue?")){
 
-		do_post('ajax.model',{'p':'purge'}, function(){
+		do_post('server',{'p':'purge'}, function(){
 			alert("All data for access key deleted");
 
 		});
@@ -527,7 +512,7 @@ function delete_caption(id, used_count)
 
 	if(used_count === '')
 	{
-		do_post('ajax.model',{p:'dscfc', id: id}, function(data){
+		do_post('server',{p:'dscfc', id: id}, function(data){
 
     	    		load_scf_captions();
 
@@ -548,7 +533,7 @@ function edit_caption(id)
 		section_type: $('#section_type').val()
 	};
 
-	do_post('ajax.model',ps, function(data){
+	do_post('server',ps, function(data){
 		var template = $('#edit-caption').html();
     		Mustache.parse(template);   
 		var rendered = Mustache.render(template, { 'caption_description': data.caption_description, 'id': data.id, 'section_type': data.section_type});
@@ -567,7 +552,7 @@ function save_edit_caption(id)
 		section_type: $('#section_type').val()
 	};
 
-	do_post('ajax.model',ps, function(data){
+	do_post('server',ps, function(data){
 
         	load_scf_captions();
 
@@ -602,18 +587,18 @@ function uploadFile(type)
 
 async function uploadFile_go(type) {
 
-    	formData = new FormData();
-    	formData.append("file", document.getElementById("file_name").files[0]);
-    	formData.append('file_name', $('#cf_slug').val() + ".data");
+    formData = new FormData();
+    formData.append("file", document.getElementById("file_name").files[0]);
+    formData.append('file_name', $('#cf_slug').val() + ".data");
 	formData.append('date', $('#date').val() );
 	formData.append('title', type + ".csv");
 	formData.append('upload_type', type );
 	formData.append('access_slug', $('#cf_slug').val() );
-    	var data = await fetch('/file', {
-      		method: "POST",
-      		body: formData
-    	});
-    	var response_data = await data.text();
+    var data = await fetch('/file', {
+    	method: "POST",
+    	body: formData
+    });
+    var response_data = await data.text();
 	return response_data;
 }
 
@@ -646,7 +631,12 @@ function reset_home()
 	introjs_page = '';
 	close_rec();
 	close_detail();
-	$('#main_content').html("");
+
+	var template = $('#home-reset').html();
+	Mustache.parse(template);   
+	var rendered = Mustache.render(template);
+
+	$('#main_content').html(rendered);
 }
 
 
@@ -657,7 +647,7 @@ function load_scf_captions()
 	var template = $('#scf-caption-template').html();
     	Mustache.parse(template);   
 	
-	do_post('ajax.model',{p: "scfc"  },function(data){
+	do_post('server',{p: "scfc"  },function(data){
         	var rendered = Mustache.render(template, data);
 	        $('#main_content').html(rendered);
 	});
@@ -701,7 +691,7 @@ function load_scf()
 	var obj = {p: "ltm", stbd: $('#stbd').val(), etbd: $('#etbd').val()  };
 	var rendered;	
 
-	do_post('default',obj,function(data){
+	do_post('server',obj,function(data){
 
 		var temp_data = { tb:data.trial_balance, 'starting':$('#stbd').val(), 'ending': $('#etbd').val()};	
         	var rendered = Mustache.render(template, temp_data);
@@ -722,7 +712,7 @@ function set_dates_tb()
 	  });
 
 
-	  do_post('ajax.model',{p:"gpp"},function(data){
+	  do_post('server',{p:"gpp"},function(data){
 		var template = $('#periods-posted-pop-up').html();
     		Mustache.parse(template);   
 		var periods_posted = Mustache.render(template, data);
@@ -817,20 +807,16 @@ function load_trial_balance()
     	Mustache.parse(template);   
 
 
-	do_post('ajax.model',{p: "gtm", access_slug:$('#cf_slug').val() },function(data){
-			
-        	var rendered = Mustache.render(template, { 'account_list':data.account_list });
-	    	$('#main_content').html(rendered);
-
+	do_post('server',{p: "gtm", access_slug:$('#cf_slug').val() },function(data){		
+        var rendered = Mustache.render(template, { 'account_list':data.account_list });
+		$('#main_content').html(rendered);
 	});
 
 }
 
 function download_trial_balance_coding()
 {
-
-
-	do_post('ajax.model',{p:"dtbc", access_slug:$('#cf_slug').val()}, function(obj){
+	do_post('server',{p:"dtbc", access_slug:$('#cf_slug').val()}, function(obj){
 
 		//convert json obj to a csv string to pass to downloadCSV
 		var fields = Object.keys(obj[0]);
@@ -853,8 +839,7 @@ function download_trial_balance_coding()
 
 function set_account_type(id,type)
 {
-
-	do_post('ajax.model', {p:"stm", account_type: type, id: id}, function(data){
+	do_post('server', {p:"stm", account_type: type, id: id}, function(data){
 		//console.log(data);
 
 	});
@@ -862,7 +847,7 @@ function set_account_type(id,type)
 }
 function delete_account(id)
 {
-	do_post('ajax.model', {p:"dta", id: id}, function(data){
+	do_post('server', {p:"dta", id: id}, function(data){
 		//console.log(data);
 		load_trial_balance();
 	});
