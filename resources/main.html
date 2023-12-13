@@ -45,7 +45,7 @@
                         <td align=center valign="bottom" class="picker-color " style="">Close Period</td>
                         <td colspan="4">
                                 <div style="text-align:right;width:100%;padding:5px;"><a id="introjs_help" href="javascript:introjs_init();" class="btn-sm btn-success"><i class="fa-solid fa-circle-question"></i></a></div>
-                                <input type=text id=cf_slug class="input" placeholder="paste your access key here to use saas95" autocomplete="off" onchange="javascript:trim_whitespace('cf_slug');">
+                                <input type=text id=cf_slug class="input" placeholder="enter your access key here to use saas95" autocomplete="off" onchange="javascript:trim_whitespace('cf_slug');">
                         </td>
                 </tr>
                 <tr>
@@ -599,7 +599,23 @@
 		
 	  </div>
 	</div>
-  </div>
+</div>
+<script id="home-reset" type="x-tmpl-mustache">
+
+	<div style="width:50%">
+	<table><tr><td>
+	<h2>Quick Start</h2>
+	<h3>Step 1: Enter your access key above</h3>
+	<h3>Step 2: Load at your trial balances <a href="javascript:import_tb();"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></h3>
+	<h3>Step 3: Code your trial balance accounts <a href="javascript:load_trial_balance();"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></h3>
+	<h3>Step 4: Set your cashflow captions <a href="javascript:load_scf_captions();"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></h3>
+	<h3>Step 5: Set your period dates <a href="javascript:set_dates_tb();"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></h3>
+	<h3>Step 6: Get to reconciling! <a href="javascript:load_scf();"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></h3>
+	</td></tr></table>
+	</div>	
+
+</script>
+
 
 
 </HTML>
