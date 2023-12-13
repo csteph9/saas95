@@ -45,7 +45,7 @@ app.get('/report', function (req, res) {
 	switch( req.query.p )
 	{
 		case 'scf': prepare_scf(req,res); break;
-                case 'vtb': view_tb(req,res); break;
+        case 'vtb': view_tb(req,res); break;
 		case 'mscf': prepare_matrix_scf(req, res);break;
 		case 'cscf': prepare_consolidating_scf(req, res); break;
 		default: res.send("Report not found")
