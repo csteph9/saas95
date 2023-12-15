@@ -1492,31 +1492,30 @@ async function save_new_cashflow_captions(req, res, file_name)
 
  	fs.createReadStream("uploads/"+file_name).pipe(csv()).on('data', (row) => {
 
-                for( i in row )
-                {
-                        //get rid of all BOM marks read in from the CSV file
-                        e = i.replace(/^\uFEFF/, "");
-                        row[e] = row[i];
-                }
-                if( available_types[ row['section_type'] ] > 0 )
-                {
+		for( i in row )
+		{
+				//get rid of all BOM marks read in from the CSV file
+				e = i.replace(/^\uFEFF/, "");
+				row[e] = row[i];
+		}
+		if( available_types[ row['section_type'] ] > 0 )
+		{
 			run_query(query, [row.caption_description, row.section_type, req.body.access_slug]);
-                } else {
+		} else {
 			//section wasn't found - by default assign it to operating reconciliation
 			run_query(query, [row.caption_description, 'operating reconciliation', req.body.access_slug]);
-                }
+		}
 
-		return_string += `<tr><td>${row.caption_description}</td><td align=right>${row.section_type}</td></tr>`
-        }).on('end', () => {
-                fs.unlink("uploads/" + file_name, ()=>{});
-		return_string += "</table></div>";
-                res.send(return_string);
-        }).on('error', (err) =>{
-                console.log(err);
-        });
+		return_string += `<tr><td>${row.caption_description}</td><td align=right>${row.section_type}</td></tr>`;
 
+	}).on('end', () => {
+			fs.unlink("uploads/" + file_name, ()=>{});
+	return_string += "</table></div>";
+			res.send(return_string);
+	}).on('error', (err) =>{
+			console.log(err);
+	});
 
-	//db.release();
 }
 
 async function export_all_data(req, res)
@@ -1545,20 +1544,20 @@ async function export_all_data(req, res)
 	[results] = await run_query(query,[req.query.access_slug]);
 
 	let rt = [];
-        for( i in results )
-        {
-            rt.push( results[i] )
-        }
+	for( i in results )
+	{
+		rt.push( results[i] )
+	}
 
 	query = `select * from cf_trial_balance_mapping where access_slug=?`;
 	[results] = await run_query(query,[req.query.access_slug]);
 
 
 	let tbm = [];
-        for( i in results )
-        {
-            tbm.push( results[i] )
-        }
+	for( i in results )
+	{
+		tbm.push( results[i] )
+	}
 	
 
 	query = `select * from statement_of_cashflows where access_slug=?`;
@@ -1572,8 +1571,8 @@ async function export_all_data(req, res)
 	query =`select * from cf_reconciliation_notes where access_slug=?`;
 	[results] = await run_query(query,[req.query.access_slug]);
 
-        let notes = [];
-        for( i in results )
+	let notes = [];
+	for( i in results )
 	{
 		notes.push(results[i]);
 	}
@@ -1581,8 +1580,7 @@ async function export_all_data(req, res)
 	res.setHeader('content-type','application/x-download');
 	res.setHeader('content-disposition',`attachment;filename=${req.query.access_slug}-backup.json`);
 	res.send(JSON.stringify({trial_balance:tb, trial_balance_mapping:tbm, cashflow_captions:captions, rec_table: rt, reconciliation_notes:notes}));
-
-
+	
 }
 
 
@@ -1601,99 +1599,99 @@ async function insert_from_backup(req, res, data)
 	res.send("Restored");
 
 	await run_query(`delete from statement_of_cashflows where access_slug=?`,[req.body.access_slug]);
-        await run_query(`delete from cf_rec_table where access_slug=?`,[req.body.access_slug]);
-        await run_query(`delete from cf_trial_balance where access_slug=?`,[req.body.access_slug]);
-        await run_query(`delete from cf_trial_balance_mapping where access_slug=?`,[req.body.access_slug]);
-        await run_query(`delete from cf_reconciliation_notes where access_slug=?`,[req.body.access_slug]);
+	await run_query(`delete from cf_rec_table where access_slug=?`,[req.body.access_slug]);
+	await run_query(`delete from cf_trial_balance where access_slug=?`,[req.body.access_slug]);
+	await run_query(`delete from cf_trial_balance_mapping where access_slug=?`,[req.body.access_slug]);
+	await run_query(`delete from cf_reconciliation_notes where access_slug=?`,[req.body.access_slug]);
 
 
         //### CASHFLOW CAPTIONS
 
-        let query = `insert into statement_of_cashflows (caption_description, section_type, access_slug) values (?, ?, ?)`;
+	let query = `insert into statement_of_cashflows (caption_description, section_type, access_slug) values (?, ?, ?)`;
 	let original_cashflow_caption_ids = {};
-        for (i in json['cashflow_captions'] )
-        {
+	for (i in json['cashflow_captions'] )
+	{
 		await run_query(query,  [ json['cashflow_captions'][i].caption_description, json['cashflow_captions'][i].section_type, req.body.access_slug   ], 'insert_from_backup', 'insert into statement_of_cashflows');
                 original_cashflow_caption_ids[ json['cashflow_captions'][i].id ] = json['cashflow_captions'][i].caption_description;
-        }
+	}
 
 
-        query = `select * from statement_of_cashflows where access_slug=?`;
+	query = `select * from statement_of_cashflows where access_slug=?`;
 	let [results] = await run_query( query , [req.body.access_slug]);
-        let cashflow_caption_ids = {};
+	let cashflow_caption_ids = {};
 	for( i in results )
 	{
 
-                cashflow_caption_ids[ results[i].caption_description ] = results[i].id;
+		cashflow_caption_ids[ results[i].caption_description ] = results[i].id;
 
-        }
+	}
 
 
-        //### TRIAL BALANCE
+	//### TRIAL BALANCE
 
-        query = `insert into cf_trial_balance (account_caption, period_date, debit, credit, access_slug) values (?, DATE_FORMAT(?, "%Y-%m-%d"), ?, ?, ?)`;
-        for( i in json['trial_balance'] )
-        {
+	query = `insert into cf_trial_balance (account_caption, period_date, debit, credit, access_slug) values (?, DATE_FORMAT(?, "%Y-%m-%d"), ?, ?, ?)`;
+	for( i in json['trial_balance'] )
+	{
 		await run_query(query, [json['trial_balance'][i].account_caption, json['trial_balance'][i].period_date, json['trial_balance'][i].debit, json['trial_balance'][i].credit, req.body.access_slug ], 'insert_from_backup', 'insert trial_balance');
-        }
+	}
 
 
 
-        //### TRIAL BALANCE MAPPING
+	//### TRIAL BALANCE MAPPING
 
-        query = `insert into cf_trial_balance_mapping (account_caption, account_type, access_slug) values (?, ?, ?)`;
+	query = `insert into cf_trial_balance_mapping (account_caption, account_type, access_slug) values (?, ?, ?)`;
 	let original_account_ids = {};
-        for (i in json['trial_balance_mapping'] )
-        {
+	for (i in json['trial_balance_mapping'] )
+	{
 		await run_query(query, [ json['trial_balance_mapping'][i].account_caption, json['trial_balance_mapping'][i].account_type, req.body.access_slug ], 'insert_from_backup', 'cf_trial_balance_mapping' );
                 original_account_ids[ json['trial_balance_mapping'][i].id ] = json['trial_balance_mapping'][i].account_caption;
                 //# 1634 = 1200 Accounts receivable (A/R)
-        }
+	}
 
-        //#get new account IDs since they have been updated with auto_increment
-        query = `select * from cf_trial_balance_mapping where access_slug=?`;
+	//#get new account IDs since they have been updated with auto_increment
+	query = `select * from cf_trial_balance_mapping where access_slug=?`;
 	[results] = await run_query(query, [req.body.access_slug]);
 	let account_ids = {};
-        for( i in results )
+	for( i in results )
 	{
 
-                account_ids[results[i].account_caption] = results[i].id;
+		account_ids[results[i].account_caption] = results[i].id;
 
-        }
+	}
 
         //### REC TABLE
 
-        query = `insert into cf_rec_table (cashflow_caption_id, open_period, close_period, rec_value, account_id, access_slug) values (?, ?, ?, ?, ?, ?)`;
-        for( i in json['rec_table'] )
-        {
-		await run_query(query, [
-                        cashflow_caption_ids[ json['rec_table'][i].caption_description ],
-                        json['rec_table'][i].open_period,
-                        json['rec_table'][i].close_period,
-                        json['rec_table'][i].rec_value,
-                        account_ids[ json['rec_table'][i].account_caption ],
-                        req.body.access_slug
-                ], 'insert_from_backup', 'insert cf_rec_table' );
+	query = `insert into cf_rec_table (cashflow_caption_id, open_period, close_period, rec_value, account_id, access_slug) values (?, ?, ?, ?, ?, ?)`;
+	for( i in json['rec_table'] )
+	{
+	await run_query(query, [
+					cashflow_caption_ids[ json['rec_table'][i].caption_description ],
+					json['rec_table'][i].open_period,
+					json['rec_table'][i].close_period,
+					json['rec_table'][i].rec_value,
+					account_ids[ json['rec_table'][i].account_caption ],
+					req.body.access_slug
+			], 'insert_from_backup', 'insert cf_rec_table' );
 
-        }
+	}
 
-        //### REC NOTES
+	//### REC NOTES
 
-        query = `insert into cf_reconciliation_notes (account_id, cashflow_caption_id, open_period, close_period, note_text, access_slug) values (?, ?, ?, ?, ?, ?)`;
-        for( i in json['reconciliation_notes'] )
-        {
+	query = `insert into cf_reconciliation_notes (account_id, cashflow_caption_id, open_period, close_period, note_text, access_slug) values (?, ?, ?, ?, ?, ?)`;
+	for( i in json['reconciliation_notes'] )
+	{
 
-		await run_query(query, [
-                        account_ids[ original_account_ids[ json['reconciliation_notes'][i].account_id ] ],
-                        cashflow_caption_ids[ original_cashflow_caption_ids[ json['reconciliation_notes'][i].cashflow_caption_id ] ],
-                        json['reconciliation_notes'][i].open_period,
-                        json['reconciliation_notes'][i].close_period,
-                        json['reconciliation_notes'][i].note_text,
-                        req.body.access_slug
-                ], 'insert_from_backup', 'insert reconciliation notes' );
+	await run_query(query, [
+			account_ids[ original_account_ids[ json['reconciliation_notes'][i].account_id ] ],
+			cashflow_caption_ids[ original_cashflow_caption_ids[ json['reconciliation_notes'][i].cashflow_caption_id ] ],
+			json['reconciliation_notes'][i].open_period,
+			json['reconciliation_notes'][i].close_period,
+			json['reconciliation_notes'][i].note_text,
+			req.body.access_slug
+		], 'insert_from_backup', 'insert reconciliation notes' );
 
 
-        }
+	}
 
 }
 
@@ -1725,19 +1723,19 @@ async function prepare_consolidating_scf(req, res)
 		cashflow_statement[ results[i].caption_section ] = {};	
 	}
 	for(i in results)
-        {
-                cashflow_statement[ results[i].caption_section ][ results[i].caption_description ] = {};
-        }
+	{
+			cashflow_statement[ results[i].caption_section ][ results[i].caption_description ] = {};
+	}
 
 	for(i in results)
-        {
-                cashflow_statement[ results[i].caption_section ][ results[i].caption_description ][ results[i].access_slug ] = 0;
-        }
+	{
+			cashflow_statement[ results[i].caption_section ][ results[i].caption_description ][ results[i].access_slug ] = 0;
+	}
 
 	for(i in results)
-        {
-                cashflow_statement[ results[i].caption_section ][ results[i].caption_description ][ results[i].access_slug ] = parseFloat(results[i].line_value);
-        }
+	{
+			cashflow_statement[ results[i].caption_section ][ results[i].caption_description ][ results[i].access_slug ] = parseFloat(results[i].line_value);
+	}
 	app.engine('html', engines.ejs);	
 	let m_obj = {open_period: req.query.open_period, close_period: req.query.close_period, cashflow_statement: cashflow_statement, access_slugs: access_slugs};
 	res.render('consolidating_statement_of_cashflows', m_obj);
@@ -1755,7 +1753,8 @@ async function run_query(query, inputs, c_aller, request_description)
 	try {
 		results = await db.execute(query, inputs);
 	} catch(e) {
-		await db.execute(`insert into error_log (caller, request_description, stack_error, error_timestamp, inputs, query) values (?, ?, ?, now(), ?, ?)`, [c_aller, request_description, e.toString(), inputs, query]);
+		//await db.execute(`insert into error_log (caller, request_description, stack_error, error_timestamp, inputs, query) values (?, ?, ?, now(), ?, ?)`, [c_aller, request_description, e.toString(), inputs, query]);
+		console.log(e);
 	}
 	db.release();
 	return results;
