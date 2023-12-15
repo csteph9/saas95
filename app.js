@@ -1644,8 +1644,7 @@ async function insert_from_backup(req, res, data)
 	for (i in json['trial_balance_mapping'] )
 	{
 		await run_query(query, [ json['trial_balance_mapping'][i].account_caption, json['trial_balance_mapping'][i].account_type, req.body.access_slug ], 'insert_from_backup', 'cf_trial_balance_mapping' );
-                original_account_ids[ json['trial_balance_mapping'][i].id ] = json['trial_balance_mapping'][i].account_caption;
-                //# 1634 = 1200 Accounts receivable (A/R)
+			original_account_ids[ json['trial_balance_mapping'][i].id ] = json['trial_balance_mapping'][i].account_caption;
 	}
 
 	//#get new account IDs since they have been updated with auto_increment
@@ -1658,21 +1657,18 @@ async function insert_from_backup(req, res, data)
 		account_ids[results[i].account_caption] = results[i].id;
 
 	}
-
-        //### REC TABLE
-
+    //### REC TABLE
 	query = `insert into cf_rec_table (cashflow_caption_id, open_period, close_period, rec_value, account_id, access_slug) values (?, ?, ?, ?, ?, ?)`;
 	for( i in json['rec_table'] )
 	{
-	await run_query(query, [
-					cashflow_caption_ids[ json['rec_table'][i].caption_description ],
-					json['rec_table'][i].open_period,
-					json['rec_table'][i].close_period,
-					json['rec_table'][i].rec_value,
-					account_ids[ json['rec_table'][i].account_caption ],
-					req.body.access_slug
-			], 'insert_from_backup', 'insert cf_rec_table' );
-
+		await run_query(query, [
+			cashflow_caption_ids[ json['rec_table'][i].caption_description ],
+			json['rec_table'][i].open_period,
+			json['rec_table'][i].close_period,
+			json['rec_table'][i].rec_value,
+			account_ids[ json['rec_table'][i].account_caption ],
+			req.body.access_slug
+		], 'insert_from_backup', 'insert cf_rec_table' );
 	}
 
 	//### REC NOTES
@@ -1689,8 +1685,6 @@ async function insert_from_backup(req, res, data)
 			json['reconciliation_notes'][i].note_text,
 			req.body.access_slug
 		], 'insert_from_backup', 'insert reconciliation notes' );
-
-
 	}
 
 }
