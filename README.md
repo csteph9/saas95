@@ -70,5 +70,5 @@ See the Getting Started User guide [here](https://saas95.com/getting_started.pl)
 
 # Start with an example
 
-Check out the example folder [here](https://github.com/csteph9/saas95/tree/main/example) for a test file you can test with and some UI screenshots.
+See [saas95/example](https://github.com/csteph9/saas95/tree/main/example) for a test file you can test with and some UI screenshots.
 
