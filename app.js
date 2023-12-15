@@ -1519,7 +1519,7 @@ async function save_new_cashflow_captions(req, res, file_name)
 async function export_all_data(req, res)
 {
 
-	let query = `select * from cf_trial_balance where access_slug=?`;
+	let query = `select id, account_caption, DATE_FORMAT(period_date, "%Y-%m-%d") period_date, debit, credit, access_slug from  cf_trial_balance where access_slug=?`;
 	let [results] = await run_query(query,[req.query.access_slug]);
 	let tb = [];
 	for( i in results )
@@ -1530,7 +1530,7 @@ async function export_all_data(req, res)
 	}
 
 	query = `select
-			rt.*, scf.caption_description, tbm.account_caption
+			rt.id, rt.cashflow_caption_id, rt.cashflow_caption, DATE_FORMAT(rt.open_period, "%Y-%m-%d") open_period, DATE_FORMAT(rt.close_period, "%Y-%m-%d") close_period, rt.rec_value, rt.account_id, rt.access_slug, scf.caption_description,tbm.account_caption
 		    from
 			cf_rec_table rt, statement_of_cashflows scf, cf_trial_balance_mapping tbm
 		    where
@@ -1566,7 +1566,7 @@ async function export_all_data(req, res)
             captions.push( results[i] )
         }
 
-	query =`select * from cf_reconciliation_notes where access_slug=?`;
+	query =`select id, account_id, cashflow_caption_id, DATE_FORMAT(open_period,"%Y-%m-%d") open_period, DATE_FORMAT(close_period, "%Y-%m-%d") close_period, note_text, access_slug from cf_reconciliation_notes where access_slug=?`;
 	[results] = await run_query(query,[req.query.access_slug]);
 
 	let notes = [];
@@ -1743,10 +1743,12 @@ async function run_query(query, inputs, c_aller, request_description)
 	const db = await pool.getConnection();
 	let results =[];
 	try {
+		
 		results = await db.execute(query, inputs);
 	} catch(e) {
 		//await db.execute(`insert into error_log (caller, request_description, stack_error, error_timestamp, inputs, query) values (?, ?, ?, now(), ?, ?)`, [c_aller, request_description, e.toString(), inputs, query]);
 		console.log(e);
+		console.log(inputs);
 	}
 	db.release();
 	return results;
