@@ -92,11 +92,10 @@ app.get('/app', function (req, res) {
 app.get('/file', function(req, res) {
 
  	switch( req.query.p )
-        {
-                case 'ead': export_all_data(req, res);break;
-                default: res.send('file type not found');break;
-
-        }
+	{
+		case 'ead': export_all_data(req, res);break;
+		default: res.send('file type not found');break;
+	}
 
 })
 
@@ -116,12 +115,11 @@ app.post('/file', upload.single('file'), function(req, res){
 
 app.get('/resource', function(req, res) {
 
-        switch( req.query.p )
-        {
-                case 'variables': get_site_variables(req, res);break;
-                default: res.send('resource not found');break;
-
-        }
+	switch( req.query.p )
+	{
+		case 'variables': get_site_variables(req, res);break;
+		default: res.send('resource not found');break;
+	}
 
 })
 
@@ -159,16 +157,16 @@ function get_site_variables(req, res)
 
 async function dtbc(req,res)
 {
-        let query = 'select * from cf_trial_balance_mapping where access_slug=?';
-        let accounts = [];
+	let query = 'select * from cf_trial_balance_mapping where access_slug=?';
+	let accounts = [];
 	let ret = [];
 
 	const [results] = run_query(query, [req.query.access_slug]);
 
 	for ( i in results )
-        {
-        	accounts.push({ account_caption: results[i].account_caption, account_type: results[i].account_type});
-     	}
+	{
+		accounts.push({ account_caption: results[i].account_caption, account_type: results[i].account_type});
+	}
 
 	res.send(JSON.stringify(accounts));
 
@@ -176,7 +174,7 @@ async function dtbc(req,res)
 
 function get_delta (account_type, starting_debit, starting_credit, ending_debit, ending_credit, return_value)
 {
-        return_value = 0;
+	return_value = 0;
 
 	if(typeof starting_debit == 'undefined')
 		starting_debit = 0;
@@ -188,34 +186,34 @@ function get_delta (account_type, starting_debit, starting_credit, ending_debit,
                 ending_credit = 0;
 
 
-        switch( account_type ){
+	switch( account_type ){
 
-                case "cash": 
+		case "cash": 
 			return_value = 0; 
 			break;
-                case "assets": 
+		case "assets": 
 			return_value = (ending_debit - ending_credit) - (starting_debit - starting_credit); 
 			break;
-                case "contra assets":
-                        return_value = (ending_debit - ending_credit) - (starting_debit - starting_credit);
+		case "contra assets":
+			return_value = (ending_debit - ending_credit) - (starting_debit - starting_credit);
 			break;
-                case "liabilities":
-                        return_value = (starting_credit - starting_debit) - (ending_credit - ending_debit);
+		case "liabilities":
+			return_value = (starting_credit - starting_debit) - (ending_credit - ending_debit);
 			break;
-                case "contra liabilities":
-                        return_value = (ending_debit - ending_credit) - (starting_debit  - starting_credit);
-                	break;
-                case "equity":
-                        return_value = (starting_credit - starting_debit) - (ending_credit - ending_debit);
-                	break;
-                case "contra equity":
-                        return_value = (ending_debit - ending_credit) - (starting_debit  - starting_credit);
+		case "contra liabilities":
+			return_value = (ending_debit - ending_credit) - (starting_debit  - starting_credit);
 			break;
-                default:
-                        return_value = 0;
-      	}
+		case "equity":
+			return_value = (starting_credit - starting_debit) - (ending_credit - ending_debit);
+			break;
+		case "contra equity":
+			return_value = (ending_debit - ending_credit) - (starting_debit  - starting_credit);
+			break;
+		default:
+			return_value = 0;
+	}
 
-        return parseFloat(return_value).toFixed(2);
+	return parseFloat(return_value).toFixed(2);
 
 }
 
@@ -1605,7 +1603,7 @@ async function insert_from_backup(req, res, data)
 	await run_query(`delete from cf_reconciliation_notes where access_slug=?`,[req.body.access_slug]);
 
 
-        //### CASHFLOW CAPTIONS
+    //### CASHFLOW CAPTIONS
 
 	let query = `insert into statement_of_cashflows (caption_description, section_type, access_slug) values (?, ?, ?)`;
 	let original_cashflow_caption_ids = {};
