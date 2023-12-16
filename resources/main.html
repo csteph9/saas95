@@ -37,48 +37,48 @@
 
 
 <center>
-        <p class="logo_font">SaaS95</p>
-        <table cellpadding="5" cellspacing="0" class="picker-shadow">
-                <tr>
-                        <td align=center valign="bottom" bgcolor="#eee" class="picker-color" style=" border-top-left-radius: 5px">Open Period</td>
-                        <td bgcolor="#eee" class="picker-color"></td>
-                        <td align=center valign="bottom" class="picker-color " style="">Close Period</td>
-                        <td colspan="4">
-                                <div style="text-align:right;width:100%;padding:5px;"><a id="introjs_help" href="javascript:introjs_init();" class="btn-sm btn-success"><i class="fa-solid fa-circle-question"></i></a></div>
-                                <input type=text id=cf_slug class="input" placeholder="enter your access key here to use saas95" autocomplete="off" onchange="javascript:trim_whitespace('cf_slug');">
-                        </td>
-                </tr>
-                <tr>
-                        <td class="picker-color" style="border-bottom-left-radius:5px;"><input type=text id=stbd placeholder="YYYY-MM-DD" value="2022-01-31" class="datepicker number_input" onchange="javascript:check_date();"></td>
-                        <td class="picker-color" ><a href="javascript:set_dates_tb();"><i class="fa-solid fa-wand-magic-sparkles"></i></a></td>
-                        <td class="picker-color" style=""><input type=text id=etbd placeholder="YYYY-MM-DD" value="2022-04-30" class="datepicker number_input" onchange="javascript:check_date();"></td>
-                        <td style="border-bottom-right-radius:5px;">
-                                <div id="smoothmenu1" class="ddsmoothmenu">
-                                <ul>
-                                        <li><a href="javascript:reset_home();" id=""><i class="fa-solid fa-house-user"></i> Home</a></li>
-                                        <li><a href="javascript:load_scf();"  id="introjs_loadrec"><i class="fa-solid fa-trowel-bricks"></i> Load Reconciliation</a></li>
-                                        <li><a  href="javascript:do_nothing();">Reporting <i class="fa-solid fa-circle-chevron-down"></i></a>
-                                        <ul>
-                                                <li><a href="javascript:show_statement('/report?');" >Cashflows</a></li>
-                                                <li><a href="javascript:show_trial_balance('/report?');">Trial Balance</a></li>
-                                                <li><a href="javascript:get_keys_for_combination();" >Consolidating SCF</a></li>
-                                                <li><a href="javascript:show_matrix('/report?');">Cashflow Matrix</a></li>
-                                        </ul>
-                                        </li>
-                                        <li><a href="javascript:do_nothing();" id="data_manager">Data <i class="fa-solid fa-circle-chevron-down"></i></a>
-                                        <ul>
-                                                <li><a href="javascript:import_tb();"  id="manage_tb"><i class="fa-solid fa-database"></i> Trial Balance DB</a></li>
-                                                <li><a href="javascript:load_trial_balance();" id="manage_tbm"><i class="fa-solid fa-gear"></i> Account Coding</a></li>
-                                                <li><a href="javascript:load_scf_captions();"  id="manage_cf_captions"><i class="fa-solid fa-gear"></i> Cashflow Captions</a></li>
-                                        </ul>
-                                        </li>
-                                        <li><a href="javascript:settings();" ><i class="fa-solid fa-gear"></i> Settings</a></li>
-                                </ul>
-                                </div>
-                        </td>
-                </tr>
+	<p class="logo_font">SaaS95</p>
+	<table cellpadding="5" cellspacing="0" class="picker-shadow">
+		<tr>
+			<td align=center valign="bottom" bgcolor="#eee" class="picker-color" style=" border-top-left-radius: 5px">Open Period</td>
+			<td bgcolor="#eee" class="picker-color"></td>
+			<td align=center valign="bottom" class="picker-color " style="">Close Period</td>
+			<td colspan="4">
+					<div style="text-align:right;width:100%;padding:5px;"><a id="introjs_help" href="javascript:introjs_init();" class="btn-sm btn-success"><i class="fa-solid fa-circle-question"></i></a></div>
+					<input type=text id=cf_slug class="input" placeholder="enter your access key here to use saas95" autocomplete="off" onchange="javascript:trim_whitespace('cf_slug');">
+			</td>
+		</tr>
+		<tr>
+			<td class="picker-color" style="border-bottom-left-radius:5px;"><input type=text id=stbd placeholder="YYYY-MM-DD" value="2022-01-31" class="datepicker number_input" onchange="javascript:check_date();"></td>
+			<td class="picker-color" ><a href="javascript:set_dates_tb();"><i class="fa-solid fa-wand-magic-sparkles"></i></a></td>
+			<td class="picker-color" style=""><input type=text id=etbd placeholder="YYYY-MM-DD" value="2022-04-30" class="datepicker number_input" onchange="javascript:check_date();"></td>
+			<td style="border-bottom-right-radius:5px;">
+				<div id="smoothmenu1" class="ddsmoothmenu">
+				<ul>
+					<li><a href="javascript:reset_home();" id=""><i class="fa-solid fa-house-user"></i> Home</a></li>
+					<li><a href="javascript:load_scf();"  id="introjs_loadrec"><i class="fa-solid fa-trowel-bricks"></i> Load Reconciliation</a></li>
+					<li><a  href="javascript:do_nothing();">Reporting <i class="fa-solid fa-circle-chevron-down"></i></a>
+					<ul>
+						<li><a href="javascript:show_statement('/report?');" >Cashflows</a></li>
+						<li><a href="javascript:show_trial_balance('/report?');">Trial Balance</a></li>
+						<li><a href="javascript:get_keys_for_combination();" >Consolidating SCF</a></li>
+						<li><a href="javascript:show_matrix('/report?');">Cashflow Matrix</a></li>
+					</ul>
+					</li>
+					<li><a href="javascript:do_nothing();" id="data_manager">Data <i class="fa-solid fa-circle-chevron-down"></i></a>
+					<ul>
+						<li><a href="javascript:import_tb();"  id="manage_tb"><i class="fa-solid fa-database"></i> Trial Balance DB</a></li>
+						<li><a href="javascript:load_trial_balance();" id="manage_tbm"><i class="fa-solid fa-gear"></i> Account Coding</a></li>
+						<li><a href="javascript:load_scf_captions();"  id="manage_cf_captions"><i class="fa-solid fa-gear"></i> Cashflow Captions</a></li>
+					</ul>
+					</li>
+					<li><a href="javascript:settings();" ><i class="fa-solid fa-gear"></i> Settings</a></li>
+				</ul>
+				</div>
+			</td>
+		</tr>
 
-        </table>
+	</table>
         <BR><BR>
 
 </center>
