@@ -535,7 +535,7 @@ function edit_caption(id)
 
 	do_post('server',ps, function(data){
 		var template = $('#edit-caption').html();
-    		Mustache.parse(template);   
+		Mustache.parse(template);   
 		var rendered = Mustache.render(template, { 'caption_description': data.caption_description, 'id': data.id, 'section_type': data.section_type});
 		$('#main_content').html(rendered);
 	});
@@ -553,9 +553,7 @@ function save_edit_caption(id)
 	};
 
 	do_post('server',ps, function(data){
-
-        	load_scf_captions();
-
+		load_scf_captions();
 	});
 
 }
@@ -645,7 +643,7 @@ function load_scf_captions()
 	close_rec();
 	introjs_page = 'scf_captions';
 	var template = $('#scf-caption-template').html();
-    	Mustache.parse(template);   
+	Mustache.parse(template);   
 	
 	do_post('server',{p: "scfc"  },function(data){
         	var rendered = Mustache.render(template, data);
@@ -714,7 +712,7 @@ function set_dates_tb()
 
 	  do_post('server',{p:"gpp"},function(data){
 		var template = $('#periods-posted-pop-up').html();
-    		Mustache.parse(template);   
+		Mustache.parse(template);   
 		var periods_posted = Mustache.render(template, data);
 		$('#set_dates_tb').html(periods_posted);
 		myModal.show();
@@ -735,6 +733,12 @@ function show_combined_scf(url)
 	if(open_period == undefined)
 	{
 		alert('Load reconciliation first');
+		return;
+	}
+	if( $('#cf_slug').val() === '')
+	{
+
+		alert("Access key blank.");
 	} else {
 		url += 'p=cscf&open_period=' + open_period + '&close_period=' + close_period + "&access_slugs=" + $('#combine_keys').val();
 		popupWindow = window.open(url,'popUpWindow2','height=800,width=800,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');
@@ -749,6 +753,7 @@ function trim_whitespace(id)
 
 function show_statement(url)
 {
+	console.log('show statement');
 
 	if(check_date() === 0)
 	{
@@ -759,6 +764,14 @@ function show_statement(url)
 	if(open_period == undefined)
 	{
 		alert('Load reconciliation first');
+		return;
+	}
+
+	if( $('#cf_slug').val() === '')
+	{
+
+		alert("Access key blank.");
+
 	} else {
 		url += 'p=scf&open_period=' + open_period + '&close_period=' + close_period + "&access_slug=" + $('#cf_slug').val();
 		popupWindow = window.open(url,'popUpWindow1','height=800,width=800,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');
@@ -770,6 +783,13 @@ function show_matrix(url)
 	if(open_period == undefined)
 	{
 		alert('Load reconciliation first');
+		return;
+
+	}
+	if( $('#cf_slug').val() === '')
+	{
+
+		alert("Access key blank.");
 	} else {
 		url += 'p=mscf&open_period=' + open_period + '&close_period=' + close_period + "&access_slug=" + $('#cf_slug').val();
 		popupWindow = window.open(url,'popUpWindow3','height=800,width=1500,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes, addressbar=no');
