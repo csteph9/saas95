@@ -1407,7 +1407,8 @@ async function view_tb(req, res)
 		trial_balance[results[i].account_caption][ results[i].period_date]['credit'] = results[i].credit;
 	}
 
-
+	let s_open_period = sanitize_date(req.query.open_period);
+	let s_close_period = sanitize_date(req.query.close_period);
 	let main_content = `
 	<title>Trial Balances</title>
 	<script src="csv.js"></script>
@@ -1419,8 +1420,8 @@ async function view_tb(req, res)
 	<thead>
 	<tr>
 			<td></td>
-			<td colspan=2 align=center>${req.query.open_period}</td>
-			<td colspan=2 align=center>${req.query.close_period}</td>
+			<td colspan=2 align=center>${s_open_period}</td>
+			<td colspan=2 align=center>${s_close_period}</td>
 	</tr>
 	<tr>
 			<td>Account</td>
