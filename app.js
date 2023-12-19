@@ -135,13 +135,13 @@ function sanitize(r)
 {
 	for( i in r )
 	{
-		r[i] = r[i].replace(/\</,'');
-		r[i] = r[i].replace(/\>/,'');
-		r[i] = r[i].replace(/\%/,'');
-		r[i] = r[i].replace(/\;/,'');
+		r[i] = r[i].replace(/\</g,'');
+		r[i] = r[i].replace(/\>/g,'');
+		r[i] = r[i].replace(/\%/g,'');
+		r[i] = r[i].replace(/\;/g,'');
 		r[i] = r[i].replace(/\.\./g,'');
 		r[i] = r[i].replace(/'/g,'');
-		r[i] = r[i].replace(/echo/,'');
+		r[i] = r[i].replace(/echo/g,'');
 		r[i] = r[i].replace(/script/g,'');
 	}
 
@@ -1213,7 +1213,7 @@ async function get_trial_balance_deltas(req, res)
 	}
 	let s_open_period = sanitize_date(req.query.open_period);
 	let s_close_period = sanitize_date(req.query.close_period);
-	
+
 	let data = {
 
 		operating_reconciliation: cashflow_recon['operating reconciliation'],
