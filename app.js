@@ -1211,6 +1211,9 @@ async function get_trial_balance_deltas(req, res)
 		non_cash_adjustment_tot += parseFloat( parseFloat(results[i].amount) );	    
 		insert_compiled_scf(req.query.access_slug, previous_period[0].period_date, req.query.close_period, 'non-cash adjustment', results[i].caption_description, results[i].amount);
 	}
+	let s_open_period = sanitize_date(req.query.open_period);
+	let s_close_period = sanitize_date(req.query.close_period);
+	
 	let data = {
 
 		operating_reconciliation: cashflow_recon['operating reconciliation'],
@@ -1218,8 +1221,8 @@ async function get_trial_balance_deltas(req, res)
 		investing: cashflow_recon['investing'],
 		financing: cashflow_recon["financing"],
 		non_cash_adjustments: cashflow_recon["non-cash adjustment"],
-		close_period: req.query.close_period,
-		open_period: req.query.open_period,
+		close_period: s_close_period,
+		open_period: s_open_period,
 		adjusted_net_income: adjusted_net_income,
 		net_cashflows_from_operations: net_cashflows_from_operations,
 		cashflows_from_investing: cashflows_from_investing,
