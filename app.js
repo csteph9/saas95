@@ -12,6 +12,7 @@ const csv = require('csv-parser');
 const config = require('./config.js');
 const engines = require('consolidate');
 const fsan = require('sanitize-filename');
+const fileRateLimit = require("./resources/rateLimiter");
 
 const pool = mysql.createPool({
   host: config.host,
@@ -26,6 +27,8 @@ const pool = mysql.createPool({
 
 app.use(express.static('resources'));
 app.use(cors());
+
+
 app.engine('html', engines.mustache);
 app.set('view engine', 'html');
 app.set('views', __dirname + '/resources');
@@ -93,7 +96,7 @@ app.get('/app', function (req, res) {
 	
 })
 
-app.get('/file', function(req, res) {
+app.get('/file', fileRateLimit, (req, res) => {
 	
  	switch( req.query.p )
 	{
@@ -103,7 +106,7 @@ app.get('/file', function(req, res) {
 
 })
 
-app.post('/file', upload.single('file'), function(req, res){
+app.post('/file', fileRateLimit, upload.single('file'), function(req, res){
 
 	switch( req.body.upload_type )
 	{
