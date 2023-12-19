@@ -1000,6 +1000,9 @@ function jlog (l)
 async function get_trial_balance_deltas(req, res)
 {
 
+	let s_open_period = sanitize_date(req.query.open_period);
+	let s_close_period = sanitize_date(req.query.close_period);
+
 	await run_query(`delete from cf_compiled_scf where access_slug=? and open_period=? and close_period=?`,[req.query.access_slug, req.query.open_period, req.query.close_period]);
     await run_query(`delete from cf_compiled_scf where open_period > close_period`);
 
@@ -1027,8 +1030,8 @@ async function get_trial_balance_deltas(req, res)
 	//### RETAINED EARNINGS
 
 	let re_h = {};
-	re_h[req.query.close_period] = {debit: parseFloat(0), credit: parseFloat(0) };
-	re_h[req.query.open_period] = {debit: parseFloat(0), credit: parseFloat(0) };
+	re_h[s_close_period] = {debit: parseFloat(0), credit: parseFloat(0) };
+	re_h[s_open_period] = {debit: parseFloat(0), credit: parseFloat(0) };
 
 
 	query = `
@@ -1048,17 +1051,17 @@ async function get_trial_balance_deltas(req, res)
 
 	for( i in closing_results)
 	{
-	    re_h[req.query.close_period]['debit'] 	=  parseFloat(re_h[req.query.close_period]['debit']) +  parseFloat(closing_results[i].debit_sum);
-	    re_h[req.query.close_period]['credit'] 	=  parseFloat(re_h[req.query.close_period]['credit']) + parseFloat(closing_results[i].credit_sum);
+	    re_h[s_close_period]['debit'] 	=  parseFloat(re_h[s_close_period]['debit']) +  parseFloat(closing_results[i].debit_sum);
+	    re_h[s_close_period]['credit'] 	=  parseFloat(re_h[s_close_period]['credit']) + parseFloat(closing_results[i].credit_sum);
 	}
 
-	let [opening_results] = await run_query(query, [req.query.open_period, req.query.access_slug]);
+	let [opening_results] = await run_query(query, [s_open_period, req.query.access_slug]);
 
 
 	for( i in opening_results)
 	{
-	    re_h[req.query.open_period]['debit'] 	= parseFloat(re_h[req.query.open_period]['debit']) + parseFloat(opening_results[i].debit_sum);
-	    re_h[req.query.open_period]['credit']	= parseFloat(re_h[req.query.open_period]['credit']) +  parseFloat(opening_results[i].credit_sum);
+	    re_h[s_open_period]['debit'] 	= parseFloat(re_h[s_open_period]['debit']) + parseFloat(opening_results[i].debit_sum);
+	    re_h[s_open_period]['credit']	= parseFloat(re_h[s_open_period]['credit']) +  parseFloat(opening_results[i].credit_sum);
 	}
 
 	let re_adjustment = ( re_h[req.query.close_period]['debit'] - re_h[req.query.open_period]['debit'] ) - ( re_h[req.query.close_period]['credit'] - re_h[req.query.open_period]['credit'] );
@@ -1079,7 +1082,7 @@ async function get_trial_balance_deltas(req, res)
 		and tb.access_slug = tbm.access_slug
 	    group by tb.period_date`;
 
-	let [results] = await run_query(query, [req.query.open_period, req.query.close_period, req.query.access_slug]);
+	let [results] = await run_query(query, [s_open_period, s_close_period, req.query.access_slug]);
 
 	let cash_balances = {};
 	for( i in results )
@@ -1087,7 +1090,7 @@ async function get_trial_balance_deltas(req, res)
 	    cash_balances[results[i].period_date] = results[i].debit_sum - results[i].credit_sum;
 	}
 	
-	let change_in_cash = parseFloat(cash_balances[req.query.close_period]) - parseFloat(cash_balances[req.query.open_period]);
+	let change_in_cash = parseFloat(cash_balances[s_close_period]) - parseFloat(cash_balances[s_open_period]);
 
 	query = `
 	    select 
@@ -1102,7 +1105,7 @@ async function get_trial_balance_deltas(req, res)
 		and scf.section_type not in ('non-cash adjustment')
 	    group by scf.caption_description`;
 
-	[results] = await run_query(query, [req.query.open_period, req.query.close_period, req.query.access_slug]);
+	[results] = await run_query(query, [s_open_period, s_close_period, req.query.access_slug]);
 	var cashflow_recon = {};
 	let total_recs = 0;
 	let scf_ids = {};
@@ -1118,42 +1121,42 @@ async function get_trial_balance_deltas(req, res)
 			'caption_description': results[i].caption_description,
 			'amount': parseFloat(results[i].scfrv),
                 	'scf_id': results[i].id,
-                	'open_period': req.query.open_period,
-                	'close_period': req.query.close_period
+                	'open_period': s_open_period,
+                	'close_period': s_close_period
 		});
 		total_recs += parseFloat(results[i].scfrv)
 	}
 	let cashflow_change_in_cash = adjusted_net_income + total_recs;
 
 
-	insert_compiled_scf(req.query.access_slug, req.query.open_period, req.query.close_period, "Net Income", "Net Income", adjusted_net_income);
+	insert_compiled_scf(req.query.access_slug, s_open_period, s_close_period, "Net Income", "Net Income", adjusted_net_income);
 	//### OPERATIONS
 	let cashflows_from_operations = 0;
 	for( i in cashflow_recon['operating reconciliation'] )
 	{
 		cashflows_from_operations += parseFloat(cashflow_recon["operating reconciliation"][i]['amount']);
-		insert_compiled_scf(req.query.access_slug, req.query.open_period, req.query.close_period, "operating reconciliation", cashflow_recon["operating reconciliation"][i]['caption_description'], cashflow_recon["operating reconciliation"][i]['amount'] );
+		insert_compiled_scf(req.query.access_slug, s_open_period, s_close_period, "operating reconciliation", cashflow_recon["operating reconciliation"][i]['caption_description'], cashflow_recon["operating reconciliation"][i]['amount'] );
 	}
 
 	for( i in cashflow_recon['change in operating accounts'] )
 	{
 		cashflows_from_operations += parseFloat(cashflow_recon["change in operating accounts"][i]['amount']);
-		insert_compiled_scf(req.query.access_slug, req.query.open_period, req.query.close_period, "change in operating accounts", cashflow_recon["change in operating accounts"][i]['caption_description'], cashflow_recon["change in operating accounts"][i]['amount']);
+		insert_compiled_scf(req.query.access_slug, s_open_period, s_close_period, "change in operating accounts", cashflow_recon["change in operating accounts"][i]['caption_description'], cashflow_recon["change in operating accounts"][i]['amount']);
 	}
 
 	let net_cashflows_from_operations = adjusted_net_income + cashflows_from_operations;
 
-	insert_compiled_scf(req.query.access_slug, req.query.open_period, req.query.close_period, "net cashflows from operations", "Net cash provided by (used in) operating activities", net_cashflows_from_operations );
+	insert_compiled_scf(req.query.access_slug, s_open_period, s_close_period, "net cashflows from operations", "Net cash provided by (used in) operating activities", net_cashflows_from_operations );
 
 	//### INVESTING
 	let cashflows_from_investing = 0;
 	for( i in cashflow_recon['investing'] )
 	{
 	    cashflows_from_investing += parseFloat( parseFloat(cashflow_recon["investing"][i]['amount']) );
-	    insert_compiled_scf(req.query.access_slug, req.query.open_period, req.query.close_period, "investing", cashflow_recon["investing"][i]['caption_description'], cashflow_recon["investing"][i]['amount']);
+	    insert_compiled_scf(req.query.access_slug, s_open_period, s_close_period, "investing", cashflow_recon["investing"][i]['caption_description'], cashflow_recon["investing"][i]['amount']);
 	}
 	
-	insert_compiled_scf(req.query.access_slug, req.query.open_period, req.query.close_period, "net cashflows from investing", "Net cash provided by (used in) investing activities", cashflows_from_investing );
+	insert_compiled_scf(req.query.access_slug, s_open_period, s_close_period, "net cashflows from investing", "Net cash provided by (used in) investing activities", cashflows_from_investing );
 
 	//### FINANCING
 	let cashflows_from_financing = 0;
@@ -1162,13 +1165,13 @@ async function get_trial_balance_deltas(req, res)
 	    cashflows_from_financing += parseFloat(cashflow_recon['financing'][i]['amount']);
 	    insert_compiled_scf(req.query.access_slug, req.query.open_period, req.query.close_period, "financing", cashflow_recon["financing"][i]['caption_description'], cashflow_recon["financing"][i]['amount'] );
 	}
-	insert_compiled_scf(req.query.access_slug, req.query.open_period, req.query.close_period, "net cashflows from financing", "Net cash provided by (used in) financing activities", cashflows_from_financing );
+	insert_compiled_scf(req.query.access_slug, s_open_period, s_close_period, "net cashflows from financing", "Net cash provided by (used in) financing activities", cashflows_from_financing );
 
 	let total_change_in_cash = net_cashflows_from_operations + cashflows_from_investing + cashflows_from_financing;
-	insert_compiled_scf(req.query.access_slug, req.query.open_period, req.query.close_period, "total change in cash", "Net increase (decrease) in cash, cash equivalents and restricted cash", total_change_in_cash);
+	insert_compiled_scf(req.query.access_slug, s_open_period, s_close_period, "total change in cash", "Net increase (decrease) in cash, cash equivalents and restricted cash", total_change_in_cash);
 
-	insert_compiled_scf(req.query.access_slug, req.query.open_period, req.query.close_period, "Beginning of period", "Beginning of Period", cash_balances[req.query.open_period]);
-	insert_compiled_scf(req.query.access_slug, req.query.open_period, req.query.close_period, "End of period", "End of Period", cash_balances[req.query.close_period]);
+	insert_compiled_scf(req.query.access_slug, s_open_period, s_close_period, "Beginning of period", "Beginning of Period", cash_balances[req.query.open_period]);
+	insert_compiled_scf(req.query.access_slug, s_open_period, s_close_period, "End of period", "End of Period", cash_balances[req.query.close_period]);
 
 	//### Non-Cash Adjustment
         // For non-cash transactions, they clear in subsequent periods. so we only want to pull any non-cash reconciliations from the most recent reporting period.
@@ -1181,7 +1184,7 @@ async function get_trial_balance_deltas(req, res)
 
 	if( previous_period.length < 1)
 	{
-		previous_period[0].period_date = req.query.close_period;
+		previous_period[0].period_date = s_close_period;
 	}
 
 	query = `
@@ -1206,14 +1209,12 @@ async function get_trial_balance_deltas(req, res)
 			'caption_description': results[i].caption_description,
 			'amount': parseFloat(results[i].amount),
 			'scf_id': results[i].id,
-			'open_period': req.query.open_period,
-			'close_period': req.query.close_period
+			'open_period': s_open_period,
+			'close_period': s_close_period
 		});
 		non_cash_adjustment_tot += parseFloat( parseFloat(results[i].amount) );	    
 		insert_compiled_scf(req.query.access_slug, previous_period[0].period_date, req.query.close_period, 'non-cash adjustment', results[i].caption_description, results[i].amount);
 	}
-	let s_open_period = sanitize_date(req.query.open_period);
-	let s_close_period = sanitize_date(req.query.close_period);
 
 	let data = {
 
