@@ -139,10 +139,10 @@ function sanitize(r)
 		r[i] = r[i].replace(/\>/,'');
 		r[i] = r[i].replace(/\%/,'');
 		r[i] = r[i].replace(/\;/,'');
-		r[i] = r[i].replace(/\.\./,'');
-		r[i] = r[i].replace(/'/,'');
+		r[i] = r[i].replace(/\.\./g,'');
+		r[i] = r[i].replace(/'/g,'');
 		r[i] = r[i].replace(/echo/,'');
-		r[i] = r[i].replace(/script/,'');
+		r[i] = r[i].replace(/script/g,'');
 	}
 
 	return r;
