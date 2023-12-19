@@ -11,6 +11,7 @@ const fs = require('fs');
 const csv = require('csv-parser');
 const config = require('./config.js');
 const engines = require('consolidate');
+const fsan = require('sanitize-filename');
 
 const pool = mysql.createPool({
   host: config.host,
@@ -106,10 +107,10 @@ app.post('/file', upload.single('file'), function(req, res){
 
 	switch( req.body.upload_type )
 	{
-		case 'trial_balance': save_trial_balance(req, res, req.file.filename); break;
-		case 'scf_captions': save_new_cashflow_captions(req, res, req.file.filename); break;	
-		case 'trial_balance_coding': save_trial_balance_coding(req, res, req.file.filename);break;
-		case 'restore': restore_from_backup(req, res, req.file.filename);break;
+		case 'trial_balance': save_trial_balance(req, res, fsan(req.file.filename)); break;
+		case 'scf_captions': save_new_cashflow_captions(req, res, fsan(req.file.filename)); break;	
+		case 'trial_balance_coding': save_trial_balance_coding(req, res, fsan(req.file.filename));break;
+		case 'restore': restore_from_backup(req, res, fsan(req.file.filename));break;
 		default: res.send('file type not found');break;
 	}
 
