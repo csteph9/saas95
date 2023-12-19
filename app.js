@@ -23,9 +23,8 @@ const pool = mysql.createPool({
 });
 
 
-app.use(express.static('resources'))
-app.use(cors())
-//app.engine('html',  mustacheExpress() );
+app.use(express.static('resources'));
+app.use(cors());
 app.engine('html', engines.mustache);
 app.set('view engine', 'html');
 app.set('views', __dirname + '/resources');
@@ -42,6 +41,10 @@ app.get('/report', function (req, res) {
 
 	res.setHeader('content-type','text/html');
 	app.engine('html', engines.mustache);
+
+	req.query.open_period = sanitize_date(req.query.open_period);
+	req.query.close_period = sanitize_date(req.query.close_period);
+
 	switch( req.query.p )
 	{
 		case 'scf': prepare_scf(req,res); break;
@@ -90,7 +93,7 @@ app.get('/app', function (req, res) {
 })
 
 app.get('/file', function(req, res) {
-
+	
  	switch( req.query.p )
 	{
 		case 'ead': export_all_data(req, res);break;
@@ -101,14 +104,13 @@ app.get('/file', function(req, res) {
 
 app.post('/file', upload.single('file'), function(req, res){
 
-	switch( req.body.upload_type)
+	switch( req.body.upload_type )
 	{
 		case 'trial_balance': save_trial_balance(req, res, req.file.filename); break;
 		case 'scf_captions': save_new_cashflow_captions(req, res, req.file.filename); break;	
 		case 'trial_balance_coding': save_trial_balance_coding(req, res, req.file.filename);break;
 		case 'restore': restore_from_backup(req, res, req.file.filename);break;
 		default: res.send('file type not found');break;
-
 	}
 
 });
@@ -121,7 +123,7 @@ app.get('/resource', function(req, res) {
 		default: res.send('resource not found');break;
 	}
 
-})
+});
 
 
 
@@ -142,16 +144,21 @@ function sanitize(r)
 		r[i] = r[i].replace(/echo/,'');
 		r[i] = r[i].replace(/script/,'');
 	}
+
 	return r;
 
 }
-
+function sanitize_date(d)
+{
+		let nd = new Date(d);
+		let e = nd.toISOString().split("T");
+		return e[0];
+}
 
 function get_site_variables(req, res)
 {
 	res.setHeader('content-type','text/javascript');
 	res.render('variables', {site_url: config.site_url, port: config.port});
-
 }
 
 
@@ -229,8 +236,8 @@ async function ltm(req,res)
 
 async function ltm_func(req, res)
 {
-        let query = 'select * from cf_trial_balance_mapping where access_slug=?';
-        let accounts = [];
+	let query = 'select * from cf_trial_balance_mapping where access_slug=?';
+	let accounts = [];
         
 	let [results] = await run_query(query, [req.query.access_slug]);
 	let account_captions_by_id = {};
@@ -238,13 +245,13 @@ async function ltm_func(req, res)
 	let account_id = {};
 	let reconciled = {};
 
-        for (k in results)
+    for (k in results)
 	{
-                account_captions_by_id[results[k].id] = results[k].account_caption;
-                account_mapping[results[k].account_caption] = results[k].account_type;
-                account_id[results[k].account_caption] = results[k].id;
+		account_captions_by_id[results[k].id] = results[k].account_caption;
+		account_mapping[results[k].account_caption] = results[k].account_type;
+		account_id[results[k].account_caption] = results[k].id;
 		reconciled[ results[k].id ] = 0;
-        }
+	}
         
 	query = 'select * from cf_rec_table where open_period>=? and close_period<=? and access_slug=?';
         
@@ -277,16 +284,16 @@ async function ltm_func(req, res)
 	let [end_date_results] = await run_query(query,  [req.query.etbd, req.query.access_slug, req.query.etbd, req.query.access_slug] );
 
 	let trial_balance_h = {};
-        let trial_balance_a = [];
+	let trial_balance_a = [];
 
 	for( i in start_date_results )
 	{
 		trial_balance_h[start_date_results[i].account_caption] = {};
 	}
  	for( i in end_date_results )
-        {
-                trial_balance_h[end_date_results[i].account_caption] = {};
-        }
+	{
+		trial_balance_h[end_date_results[i].account_caption] = {};
+	}
 
 
 	for(i in start_date_results)
@@ -296,10 +303,10 @@ async function ltm_func(req, res)
 	}
 
 	for(i in end_date_results)
-        {
-                trial_balance_h[end_date_results[i].account_caption]['ending_debit'] = Math.abs(end_date_results[i].debit);
-                trial_balance_h[end_date_results[i].account_caption]['ending_credit'] =  Math.abs(end_date_results[i].credit);
-        }
+	{
+		trial_balance_h[end_date_results[i].account_caption]['ending_debit'] = Math.abs(end_date_results[i].debit);
+		trial_balance_h[end_date_results[i].account_caption]['ending_credit'] =  Math.abs(end_date_results[i].credit);
+	}
 	
 	//Order the object
 	const ordered_tb = Object.keys(trial_balance_h).sort().reduce(
@@ -324,10 +331,8 @@ async function ltm_func(req, res)
 			reconciliation_complete = 1;
 		}			
 
-
 		let starting = get_true_balance(account_mapping[i], ordered_tb[i].starting_debit, ordered_tb[i].starting_credit);
-                let ending = get_true_balance(account_mapping[i], ordered_tb[i].ending_debit, ordered_tb[i].ending_credit);
-
+		let ending = get_true_balance(account_mapping[i], ordered_tb[i].ending_debit, ordered_tb[i].ending_credit);
 
 		trial_balance_a.push({
 			account_caption: i,
@@ -341,12 +346,11 @@ async function ltm_func(req, res)
 			reconciliation_complete: reconciliation_complete,
 			reconciliation_complete_number: reconciliation_complete_number,
 			reconciled: parseFloat( reconciled[ account_id[i] ] ).toFixed(2)
-                });
+        });
 
 	}
-	//res.send(JSON.stringify({trial_balance: trial_balance_a}));
-	return trial_balance_a;
 
+	return trial_balance_a;
 
 }
 
@@ -361,9 +365,10 @@ async function get_previous_reporting_period(req)
 async function get_account_sections(req)
 {
 
-	let query = `select 
+	let query = `
+	select 
 		sum(rt.rec_value) rec_value,
-    		scf.section_type, 
+    	scf.section_type, 
 		tbm.account_caption
     
 	from 
@@ -394,9 +399,6 @@ async function get_account_sections(req)
 
 	return sec_acct;
 
-	
-
-
 }
 
 function get_true_balance(account_type, debit, credit)
@@ -407,39 +409,37 @@ function get_true_balance(account_type, debit, credit)
 	if(typeof credit == 'undefined')
 		credit = 0;
 
-        let return_value = 0;
+	let return_value = 0;
 
-        switch( account_type ){
+	switch( account_type ){
 
-                case "cash":
-                        return_value = debit - credit;
+		case "cash":
+			return_value = debit - credit;
+		break;
+		case "assets":
+			return_value = debit - credit;
 			break;
-                
-                case "assets":
-                        return_value = debit - credit;
-                	break;
-                case "contra assets":
-                        return_value = debit - credit;
+		case "contra assets":
+			return_value = debit - credit;
 			break;
-                
-                case "liabilities":
-                        return_value = credit - debit;
-                	break;
-                case "contra liabilities":
-                        return_value = debit - credit;
-                	break;
-                case "equity":
-                        return_value = credit - debit;
-                	break;
-                case "contra equity":
-                        return_value = debit - credit;
-                	break;
-                default:
-                        return_value = 0;
+		case "liabilities":
+			return_value = credit - debit;
 			break;
-        }
+		case "contra liabilities":
+			return_value = debit - credit;
+			break;
+		case "equity":
+			return_value = credit - debit;
+			break;
+		case "contra equity":
+			return_value = debit - credit;
+			break;
+		default:
+			return_value = 0;
+		break;
+	}
 
-        return parseFloat(return_value).toFixed(2);
+	return parseFloat(return_value).toFixed(2);
 
 }
 
@@ -450,16 +450,15 @@ async function ck_slug(req, res)
 
 async function gcfels(req,res)
 {
-       	let query = 'select * from statement_of_cashflows where access_slug=? order by section_type asc';
+	let query = 'select * from statement_of_cashflows where access_slug=? order by section_type asc';
 	let [results] = await run_query(query, [req.query.access_slug]);
 
 	let cfels = [];
-        for( i in results)
+	for( i in results)
 	{
 		cfels.push(results[i].caption_description);
-        }
-        res.send(JSON.stringify(cfels));
-
+	}
+	res.send(JSON.stringify(cfels));
 }
 
 async function get_current_reconciliation(req, res)
@@ -564,10 +563,10 @@ async function gpp(req,res)
 async function purge(req,res)
 {
 	await run_query(`delete from cf_trial_balance where access_slug=?`, [ req.query.access_slug ]);
-        await run_query(`delete from cf_trial_balance_mapping where access_slug=?`, [req.query.access_slug] );
-        await run_query(`delete from cf_rec_table where access_slug=?`, [req.query.access_slug]);
-        await run_query(`delete from cf_reconciliation_notes where access_slug=?`, [req.query.access_slug]);
-        await run_query(`delete from statement_of_cashflows where access_slug=?`, [req.query.access_slug]);
+	await run_query(`delete from cf_trial_balance_mapping where access_slug=?`, [req.query.access_slug] );
+	await run_query(`delete from cf_rec_table where access_slug=?`, [req.query.access_slug]);
+	await run_query(`delete from cf_reconciliation_notes where access_slug=?`, [req.query.access_slug]);
+	await run_query(`delete from statement_of_cashflows where access_slug=?`, [req.query.access_slug]);
 
 	res.send(JSON.stringify({status: "OK"}));
 
@@ -745,10 +744,10 @@ async function gr(req,res)
 	);
 
 	let send = {lines: lines, 
-			account_name: account[0].account_caption, 
-			open_balance: open_balance_dc, 
-			close_balance: close_balance_dc, 
-			delta: delta};
+		account_name: account[0].account_caption, 
+		open_balance: open_balance_dc, 
+		close_balance: close_balance_dc, 
+		delta: delta};
 
 	res.send(JSON.stringify(send));
 }
@@ -920,13 +919,13 @@ async function create_matrix_scf(req, res, d, tb, as, rt)
 			as[ tb[i].account_caption ]["operating reconciliation"] = 0;
 
 		if( typeof as[ tb[i].account_caption ]["change in operating accounts"] === "undefined")
-                        as[ tb[i].account_caption ]["change in operating accounts"] = 0;
+			as[ tb[i].account_caption ]["change in operating accounts"] = 0;
 
 		if( typeof as[ tb[i].account_caption ]["investing"] === "undefined")
-                        as[ tb[i].account_caption ]["investing"] = 0;
+			as[ tb[i].account_caption ]["investing"] = 0;
 
 		if( typeof as[ tb[i].account_caption ]["financing"] === "undefined")
-                        as[ tb[i].account_caption ]["financing"] = 0;
+			as[ tb[i].account_caption ]["financing"] = 0;
 
 
 		let cioa = parseFloat(as[ tb[i].account_caption ]['operating reconciliation']);
@@ -1001,7 +1000,7 @@ async function get_trial_balance_deltas(req, res)
 {
 
 	await run_query(`delete from cf_compiled_scf where access_slug=? and open_period=? and close_period=?`,[req.query.access_slug, req.query.open_period, req.query.close_period]);
-        await run_query(`delete from cf_compiled_scf where open_period > close_period`);
+    await run_query(`delete from cf_compiled_scf where open_period > close_period`);
 
 
 	//### NET INCOME
@@ -1020,7 +1019,7 @@ async function get_trial_balance_deltas(req, res)
 	    `;
 
 	let [ni_close] = await run_query(query, [req.query.access_slug, req.query.close_period]);
-        let [ni_open] = await run_query(query, [req.query.access_slug, req.query.open_period]);
+    let [ni_open] = await run_query(query, [req.query.access_slug, req.query.open_period]);
 
 	let net_income = ni_close[0].net_income  - ni_open[0].net_income;
 
@@ -1131,15 +1130,14 @@ async function get_trial_balance_deltas(req, res)
 	let cashflows_from_operations = 0;
 	for( i in cashflow_recon['operating reconciliation'] )
 	{
-	    	cashflows_from_operations += parseFloat(cashflow_recon["operating reconciliation"][i]['amount']);
-	    	insert_compiled_scf(req.query.access_slug, req.query.open_period, req.query.close_period, "operating reconciliation", cashflow_recon["operating reconciliation"][i]['caption_description'], cashflow_recon["operating reconciliation"][i]['amount'] );
+		cashflows_from_operations += parseFloat(cashflow_recon["operating reconciliation"][i]['amount']);
+		insert_compiled_scf(req.query.access_slug, req.query.open_period, req.query.close_period, "operating reconciliation", cashflow_recon["operating reconciliation"][i]['caption_description'], cashflow_recon["operating reconciliation"][i]['amount'] );
 	}
 
 	for( i in cashflow_recon['change in operating accounts'] )
 	{
-	    	cashflows_from_operations += parseFloat(cashflow_recon["change in operating accounts"][i]['amount']);
-
-	    	insert_compiled_scf(req.query.access_slug, req.query.open_period, req.query.close_period, "change in operating accounts", cashflow_recon["change in operating accounts"][i]['caption_description'], cashflow_recon["change in operating accounts"][i]['amount']);
+		cashflows_from_operations += parseFloat(cashflow_recon["change in operating accounts"][i]['amount']);
+		insert_compiled_scf(req.query.access_slug, req.query.open_period, req.query.close_period, "change in operating accounts", cashflow_recon["change in operating accounts"][i]['caption_description'], cashflow_recon["change in operating accounts"][i]['amount']);
 	}
 
 	let net_cashflows_from_operations = adjusted_net_income + cashflows_from_operations;
@@ -1203,13 +1201,13 @@ async function get_trial_balance_deltas(req, res)
 	cashflow_recon['non-cash adjustment'] = [];	
 	for( i in results )
 	{
-         	cashflow_recon['non-cash adjustment'].push({
-                        'caption_description': results[i].caption_description,
-                        'amount': parseFloat(results[i].amount),
-                        'scf_id': results[i].id,
-                        'open_period': req.query.open_period,
-                        'close_period': req.query.close_period
-                });
+		cashflow_recon['non-cash adjustment'].push({
+			'caption_description': results[i].caption_description,
+			'amount': parseFloat(results[i].amount),
+			'scf_id': results[i].id,
+			'open_period': req.query.open_period,
+			'close_period': req.query.close_period
+		});
 		non_cash_adjustment_tot += parseFloat( parseFloat(results[i].amount) );	    
 		insert_compiled_scf(req.query.access_slug, previous_period[0].period_date, req.query.close_period, 'non-cash adjustment', results[i].caption_description, results[i].amount);
 	}
@@ -1237,11 +1235,12 @@ async function get_trial_balance_deltas(req, res)
 
 }
 
+
 async function insert_compiled_scf( access_slug, open_period, close_period, scf_section, scf_caption, line_value)
 {
 
         await run_query(`insert into cf_compiled_scf (access_slug, open_period, close_period, caption_section, caption_description, line_value) values (?, ?, ?, ?, ?, ?)`,
-                [access_slug, open_period, close_period, scf_section, scf_caption, line_value]);
+			[access_slug, open_period, close_period, scf_section, scf_caption, line_value]);
 
 }
 
@@ -1250,15 +1249,15 @@ async function insert_compiled_scf( access_slug, open_period, close_period, scf_
 async function save_trial_balance_coding(req, res, file_name)
 {
 
-        let query = `select account_caption from cf_trial_balance_mapping where access_slug=?`;
+	let query = `select account_caption from cf_trial_balance_mapping where access_slug=?`;
 	let [results] = await run_query(query, [req.body.access_slug]);
 
 
 	let account_list = {};
 	for( i in results )
-        {
-                account_list[results[i].account_caption] = 1;
-        }
+	{
+		account_list[results[i].account_caption] = 1;
+	}
 	let insertQuery = `insert into cf_trial_balance_mapping (account_caption, account_type, access_slug) values (?, ?, ?)`;
 	let updateQuery = `update cf_trial_balance_mapping set account_type=? where access_slug=? and account_caption=?`;
 
@@ -1292,43 +1291,29 @@ async function save_trial_balance(req, res, file_name)
 	await run_query('delete from cf_trial_balance where period_date=? and access_slug=?', [req.body.date, req.body.access_slug]);
 
 	let trial_balance = [];
-        fs.createReadStream("uploads/"+file_name).pipe(csv()).on('data', (row) => {
+	fs.createReadStream("uploads/"+file_name).pipe(csv()).on('data', (row) => {
 
-                for( i in row )
-                {
-                        //get rid of all BOM (byte order marks) characters read in from the CSV file
-                        e = i.replace(/^\uFEFF/, "");
-                        row[e] = row[i];
-                }
-
-		//do some basic data grooming to make sure currency symbols, quotes, apostrophies, or commas aren't accidently left in the nmber colums.
-		/*
-		row.debit = row.debit.replace(/"/g, '');
-		row.debit = row.debit.replace(/'/g, '');
-		row.debit = row.debit.replace(/\$/g, '');
-		row.debit = row.debit.replace(/\£/g, '');
-		row.debit = row.debit.replace(/\,/g, '');
-
-		row.credit = row.credit.replace(/"/g, '');
-                row.credit = row.credit.replace(/'/g, '');
-                row.credit = row.credit.replace(/\$/g, '');
-                row.credit = row.credit.replace(/\£/g, '');
-                row.credit = row.credit.replace(/\,/g, '');
-		*/
+		for( i in row )
+		{
+			//get rid of all BOM (byte order marks) characters read in from the CSV file
+			e = i.replace(/^\uFEFF/, "");
+			row[e] = row[i];
+		}
 
 		trial_balance.push(row);
 
-        }).on('end', () => {
-                fs.unlink("uploads/" + file_name, ()=>{
+	}).on('end', () => {
+
+		fs.unlink("uploads/" + file_name, ()=>{
 			//delete record saved in the uploads directory - we don't need it.
 		});
 
 		//with the trial balance array populated, pass off the data to a function that will insert it.
 		insert_trial_balance_records(req, res, trial_balance);
 
-        }).on('error', (err) =>{
-                console.log(err);
-        });
+	}).on('error', (err) =>{
+			console.log(err);
+	});
 
 }
 
@@ -1339,14 +1324,14 @@ async function insert_trial_balance_records(req, res, trial_balance)
  	let query = `select account_caption from cf_trial_balance_mapping where access_slug=?`;
 	let [results] = await run_query(query, [req.body.access_slug]);
 
-        let in_map = {};
-        for( i in results )
-        {
-                in_map[ results[i].account_caption ] = 1;
-        }
+	let in_map = {};
+	for( i in results )
+	{
+		in_map[ results[i].account_caption ] = 1;
+	}
 
 	let map_query = `insert into cf_trial_balance_mapping (account_caption, access_slug) values (?, ?)`;
-        let tb_insert = `insert into cf_trial_balance (account_caption, period_date, debit, credit, access_slug) values (?, ?, ?, ?, ?)`;
+	let tb_insert = `insert into cf_trial_balance (account_caption, period_date, debit, credit, access_slug) values (?, ?, ?, ?, ?)`;
 	let debit_total = 0;
 	let credit_total = 0;
 
@@ -1354,33 +1339,31 @@ async function insert_trial_balance_records(req, res, trial_balance)
 	{
 
 		//skip blank lines
-                if( /^$/ig.test(trial_balance[r].account_caption ) )
-                        continue;
+		if( /^$/ig.test(trial_balance[r].account_caption ) )
+			continue;
 
 
 		row.debit = row.debit.replace(/"/g, '');
-                row.debit = row.debit.replace(/'/g, '');
-                row.debit = row.debit.replace(/\$/g, '');
-                row.debit = row.debit.replace(/\£/g, '');
-                row.debit = row.debit.replace(/\,/g, '');
+		row.debit = row.debit.replace(/'/g, '');
+		row.debit = row.debit.replace(/\$/g, '');
+		row.debit = row.debit.replace(/\£/g, '');
+		row.debit = row.debit.replace(/\,/g, '');
 
-                row.credit = row.credit.replace(/"/g, '');
-                row.credit = row.credit.replace(/'/g, '');
-                row.credit = row.credit.replace(/\$/g, '');
-                row.credit = row.credit.replace(/\£/g, '');
-                row.credit = row.credit.replace(/\,/g, '');
+		row.credit = row.credit.replace(/"/g, '');
+		row.credit = row.credit.replace(/'/g, '');
+		row.credit = row.credit.replace(/\$/g, '');
+		row.credit = row.credit.replace(/\£/g, '');
+		row.credit = row.credit.replace(/\,/g, '');
 
 		//skip any rows that start with "total"
-                if( /^total/ig.test(trial_balance[r].account_caption ))
-                        continue;
+		if( /^total/ig.test(trial_balance[r].account_caption ))
+			continue;
 
 		//Make sure all new trial balance accounts are in the SCF map so they can be coded to a cashflow statement section.
-                if( typeof in_map[ trial_balance[r].account_caption ] == "undefined" )
-                {
-                        //await db.execute(map_query, [trial_balance[r].account_caption, req.body.access_slug]);
+		if( typeof in_map[ trial_balance[r].account_caption ] == "undefined" )
+		{
 			await run_query(map_query, [trial_balance[r].account_caption, req.body.access_slug]);
-
-                }
+		}
 
 		debit_total += parseFloat(trial_balance[r].debit);
 		credit_total += parseFloat(trial_balance[r].credit);
@@ -1393,16 +1376,15 @@ async function insert_trial_balance_records(req, res, trial_balance)
 
 }
 
-
 async function view_tb(req, res)
 {
 	
-        let query = `select *,DATE_FORMAT(period_date, '%Y-%m-%d') as period_date from cf_trial_balance where period_date in (?, ?) and access_slug=?`;
+	let query = `select *,DATE_FORMAT(period_date, '%Y-%m-%d') as period_date from cf_trial_balance where period_date in (?, ?) and access_slug=?`;
 	let [results] = await run_query(query, [req.query.open_period, req.query.close_period, req.query.access_slug] );
 
 
 	let trial_balance = {};
-        //iniitialize trial_balance structure
+	//iniitialize trial_balance structure
 	//there has to be a better way
 	for( i in results )
 	{
@@ -1423,53 +1405,52 @@ async function view_tb(req, res)
 	}
 
 
-        let main_content = `
-        <title>Trial Balances</title>
-        <script src="csv.js"></script>
-        <center>
-        <p class=poppins_font style="font-size:30px;">Trial Balance</p>
-        <a href="javascript:exportTableToCSV('tb_table', 'trial_balance.csv');" class="btn btn-dark"><i class="fa-solid fa-file-csv"></i> Download</a><BR><BR>
-        <div style="width:90%">
-        <table class=table border=1 id=tb_table>
-        <thead>
-        <tr>
-                <td></td>
-                <td colspan=2 align=center>${req.query.open_period}</td>
-                <td colspan=2 align=center>${req.query.close_period}</td>
-        </tr>
-        <tr>
-                <td>Account</td>
-                <td align=center>Debit</td>
-                <td align=center>Credit</td>
-                <td align=center>Debit</td>
-                <td align=center>Credit</td>
-        </tr>
-        </thead>`;
+	let main_content = `
+	<title>Trial Balances</title>
+	<script src="csv.js"></script>
+	<center>
+	<p class=poppins_font style="font-size:30px;">Trial Balance</p>
+	<a href="javascript:exportTableToCSV('tb_table', 'trial_balance.csv');" class="btn btn-dark"><i class="fa-solid fa-file-csv"></i> Download</a><BR><BR>
+	<div style="width:90%">
+	<table class=table border=1 id=tb_table>
+	<thead>
+	<tr>
+			<td></td>
+			<td colspan=2 align=center>${req.query.open_period}</td>
+			<td colspan=2 align=center>${req.query.close_period}</td>
+	</tr>
+	<tr>
+			<td>Account</td>
+			<td align=center>Debit</td>
+			<td align=center>Credit</td>
+			<td align=center>Debit</td>
+			<td align=center>Credit</td>
+	</tr>
+	</thead>`;
 
-        for( i in trial_balance )
-        {
+	for( i in trial_balance )
+	{
 
 		let open_debit = trial_balance[i][req.query.open_period]['debit'];
 		let open_credit = trial_balance[i][req.query.open_period]['credit'];
 		let close_debit = trial_balance[i][req.query.close_period]['debit'];
 		let close_credit = trial_balance[i][req.query.close_period]['credit'];
-		
 	
-                main_content += `
-                <tr>
-                        <td>${i}</td>
-                        <td align=right><div class=comma>${ open_debit }</div></td>
-                        <td align=right><div class=comma>${ open_credit }</div></td>
-                        <td align=right><div class=comma>${ close_debit }</div></td>
-                        <td align=right><div class=comma>${ close_credit }</div></td>
-                </tr>`;
-	
-        }
+
+		main_content += `
+		<tr>
+				<td>${i}</td>
+				<td align=right><div class=comma>${ open_debit }</div></td>
+				<td align=right><div class=comma>${ open_credit }</div></td>
+				<td align=right><div class=comma>${ close_debit }</div></td>
+				<td align=right><div class=comma>${ close_credit }</div></td>
+		</tr>`;
+
+	}
         
 	main_content += `
         </table></div>
         </center>`;
-
 
 	res.send(main_content);
 }
@@ -1480,13 +1461,13 @@ async function save_new_cashflow_captions(req, res, file_name)
 	let query = `insert into statement_of_cashflows (caption_description, section_type, access_slug) values (?, ?, ?)`;
 
 	let available_types = {};
-        available_types['operating reconciliation'] = 1;
-        available_types['change in operating accounts'] = 1;
-        available_types['non-cash adjustment'] = 1;
-        available_types['investing'] = 1;
-        available_types['financing'] = 1;
+	available_types['operating reconciliation'] = 1;
+	available_types['change in operating accounts'] = 1;
+	available_types['non-cash adjustment'] = 1;
+	available_types['investing'] = 1;
+	available_types['financing'] = 1;
 
-        let return_string = `<div style="width:30%"><table class=table><tr><td>Caption Description</td><td>Section Type</td></tr>`;
+	let return_string = `<div style="width:30%"><table class=table><tr><td>Caption Description</td><td>Section Type</td></tr>`;
 
  	fs.createReadStream("uploads/"+file_name).pipe(csv()).on('data', (row) => {
 
@@ -1525,8 +1506,6 @@ async function export_all_data(req, res)
 	for( i in results )
 	{
 	    tb.push( results[i] )
-
-
 	}
 
 	query = `select
@@ -1557,14 +1536,13 @@ async function export_all_data(req, res)
 		tbm.push( results[i] )
 	}
 	
-
 	query = `select * from statement_of_cashflows where access_slug=?`;
 	[results] = await run_query(query,[req.query.access_slug]);
 	let captions = [];
-        for( i in results )
-        {
-            captions.push( results[i] )
-        }
+	for( i in results )
+	{
+		captions.push( results[i] )
+	}
 
 	query =`select id, account_id, cashflow_caption_id, DATE_FORMAT(open_period,"%Y-%m-%d") open_period, DATE_FORMAT(close_period, "%Y-%m-%d") close_period, note_text, access_slug from cf_reconciliation_notes where access_slug=?`;
 	[results] = await run_query(query,[req.query.access_slug]);
@@ -1602,7 +1580,6 @@ async function insert_from_backup(req, res, data)
 	await run_query(`delete from cf_trial_balance_mapping where access_slug=?`,[req.body.access_slug]);
 	await run_query(`delete from cf_reconciliation_notes where access_slug=?`,[req.body.access_slug]);
 
-
     //### CASHFLOW CAPTIONS
 
 	let query = `insert into statement_of_cashflows (caption_description, section_type, access_slug) values (?, ?, ?)`;
@@ -1613,17 +1590,13 @@ async function insert_from_backup(req, res, data)
                 original_cashflow_caption_ids[ json['cashflow_captions'][i].id ] = json['cashflow_captions'][i].caption_description;
 	}
 
-
 	query = `select * from statement_of_cashflows where access_slug=?`;
 	let [results] = await run_query( query , [req.body.access_slug]);
 	let cashflow_caption_ids = {};
 	for( i in results )
 	{
-
 		cashflow_caption_ids[ results[i].caption_description ] = results[i].id;
-
 	}
-
 
 	//### TRIAL BALANCE
 
@@ -1633,8 +1606,6 @@ async function insert_from_backup(req, res, data)
 		await run_query(query, [json['trial_balance'][i].account_caption, json['trial_balance'][i].period_date, json['trial_balance'][i].debit, json['trial_balance'][i].credit, req.body.access_slug ], 'insert_from_backup', 'insert trial_balance');
 	}
 
-
-
 	//### TRIAL BALANCE MAPPING
 
 	query = `insert into cf_trial_balance_mapping (account_caption, account_type, access_slug) values (?, ?, ?)`;
@@ -1642,7 +1613,7 @@ async function insert_from_backup(req, res, data)
 	for (i in json['trial_balance_mapping'] )
 	{
 		await run_query(query, [ json['trial_balance_mapping'][i].account_caption, json['trial_balance_mapping'][i].account_type, req.body.access_slug ], 'insert_from_backup', 'cf_trial_balance_mapping' );
-			original_account_ids[ json['trial_balance_mapping'][i].id ] = json['trial_balance_mapping'][i].account_caption;
+		original_account_ids[ json['trial_balance_mapping'][i].id ] = json['trial_balance_mapping'][i].account_caption;
 	}
 
 	//#get new account IDs since they have been updated with auto_increment
@@ -1651,9 +1622,7 @@ async function insert_from_backup(req, res, data)
 	let account_ids = {};
 	for( i in results )
 	{
-
 		account_ids[results[i].account_caption] = results[i].id;
-
 	}
     //### REC TABLE
 	query = `insert into cf_rec_table (cashflow_caption_id, open_period, close_period, rec_value, account_id, access_slug) values (?, ?, ?, ?, ?, ?)`;
@@ -1691,12 +1660,10 @@ async function insert_from_backup(req, res, data)
 async function prepare_consolidating_scf(req, res)
 {
 
-
 	let access_slugs = req.query.access_slugs.split(",");
 
 	var q = Array(access_slugs.length + 1).join("?,").replace(/(,$)/, "");
 	console.log(q);
-
 
 	let query = `select * from cf_compiled_scf where access_slug in (${q}) and open_period>=? and close_period<=?`;
 	let inputs = [];
@@ -1734,8 +1701,6 @@ async function prepare_consolidating_scf(req, res)
 
 
 }
-
-
 
 
 async function run_query(query, inputs, c_aller, request_description)
