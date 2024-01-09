@@ -13,6 +13,7 @@ const config = require('./config.js');
 const engines = require('consolidate');
 const fsan = require('sanitize-filename');
 const fileRateLimit = require("./resources/rateLimiter");
+const validator = require('validator');
 
 const pool = mysql.createPool({
   host: config.host,
@@ -139,14 +140,7 @@ function sanitize(r)
 {
 	for( i in r )
 	{
-		r[i] = r[i].replace(/\</g,'');
-		r[i] = r[i].replace(/\>/g,'');
-		r[i] = r[i].replace(/\%/g,'');
-		r[i] = r[i].replace(/\;/g,'');
-		r[i] = r[i].replace(/\.\./g,'');
-		r[i] = r[i].replace(/'/g,'');
-		r[i] = r[i].replace(/echo/g,'');
-		r[i] = r[i].replace(/script/g,'');
+		r[i] = validator.escape(r[i]);
 	}
 
 	return r;

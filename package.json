@@ -25,6 +25,7 @@
     "mysql2": "^3.6.5",
     "node-import": "^0.9.2",
     "nodemon": "^3.0.1",
-    "sanitize-filename": "^1.6.3"
+    "sanitize-filename": "^1.6.3",
+    "validator": "^13.11.0"
   }
 }
