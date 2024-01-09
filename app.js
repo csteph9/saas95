@@ -74,7 +74,6 @@ app.get('/app', function (req, res) {
 		case 'ck_slug': ck_slug(req, res); break;
 		case 'gcfels': gcfels(req, res); break;
 		case 'get_current_reconciliation':get_current_reconciliation(req, res); break;
-		case 'dtbc':dtbc(req, res); break;
 		case 'dtbe':dtbe(req, res); break;
 		case 'gpp':gpp(req, res); break;
 		case 'purge':purge(req, res); break;
