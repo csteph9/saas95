@@ -242,7 +242,7 @@ async function ltm_func(req, res)
 	let account_id = {};
 	let reconciled = {};
 
-    for (k in results)
+    	for (k in results)
 	{
 		account_captions_by_id[results[k].id] = results[k].account_caption;
 		account_mapping[results[k].account_caption] = results[k].account_type;
@@ -343,7 +343,7 @@ async function ltm_func(req, res)
 			reconciliation_complete: reconciliation_complete,
 			reconciliation_complete_number: reconciliation_complete_number,
 			reconciled: parseFloat( reconciled[ account_id[i] ] ).toFixed(2)
-        });
+        	});
 
 	}
 
@@ -584,7 +584,8 @@ async function dscfc(req,res)
 async function snscfc(req,res)
 {
 	res.setHeader('content-type','application/json');
-	await run_query(`insert into statement_of_cashflows (caption_description, section_type, access_slug) values (?,?, ?)`, [req.query.caption_description, req.query.section_type, req.query.access_slug]);
+	await run_query(`insert into statement_of_cashflows (caption_description, section_type, access_slug) values (?,?, ?)`, 
+		[req.query.caption_description, req.query.section_type, req.query.access_slug]);
 	res.send(JSON.stringify({status:"OK"}));
 }
 
@@ -640,7 +641,8 @@ async function gtm(req,res)
 
 async function stm(req,res)
 {
-	await run_query(`update cf_trial_balance_mapping set account_type=? where id=? and access_slug=?`,[req.query.account_type, req.query.id, req.query.access_slug]);
+	await run_query(`update cf_trial_balance_mapping set account_type=? where id=? and access_slug=?`,
+		[req.query.account_type, req.query.id, req.query.access_slug]);
 	res.send(JSON.stringify({status: "OK"}));
 }
 
@@ -656,13 +658,20 @@ async function sr(req,res)
 	}
 	for( i in recons2)
 	{		
-		await run_query(`delete from cf_rec_table where account_id=? and open_period=? and close_period=? and access_slug=?`, [req.query.account_id, recons2[i][0].open_period, recons2[i][0].close_period, req.query.access_slug]);
+		await run_query(`delete from cf_rec_table where account_id=? and open_period=? and close_period=? and access_slug=?`, 
+			[req.query.account_id, recons2[i][0].open_period, recons2[i][0].close_period, req.query.access_slug]);
 	}
 
 	query = `insert into cf_rec_table (cashflow_caption_id, open_period, close_period, rec_value, account_id, access_slug) values (?, ?, ?, ?, ?, ?)`;
 	for (i in recons2)
 	{
-		await run_query(query, [ captions[recons2[i][0].caption_description], recons2[i][0].open_period,  recons2[i][0].close_period, recons2[i][0].value, req.query.account_id, req.query.access_slug]);
+		await run_query(query, [ 
+			captions[recons2[i][0].caption_description], 
+			recons2[i][0].open_period,  
+			recons2[i][0].close_period, 
+			recons2[i][0].value, 
+			req.query.account_id, 
+			req.query.access_slug]);
 
 	}
 
@@ -852,20 +861,20 @@ async function get_balance(date, account_caption, access_slug)
 
 function generate_random_string(length) 
 {
-    const characters = 'ABCDEFGHIJKLMNOP_-QRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
+	const characters = 'ABCDEFGHIJKLMNOP_-QRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    	let result = '';
     
-    let i = 0;
-    while (i < length) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
-      i += 1;
-    }
-    return result;
+    	let i = 0;
+    	while (i < length) {
+      		result += characters.charAt(Math.floor(Math.random() * characters.length));
+      		i += 1;
+    	}
+    	return result;
 }
 
 function get_value_or_zero(n) 
 {
-  return n>0 ? parseFloat(n).toFixed(2) : parseFloat(0).toFixed(2);
+	return n>0 ? parseFloat(n).toFixed(2) : parseFloat(0).toFixed(2);
 }
 
 
@@ -1000,7 +1009,7 @@ async function get_trial_balance_deltas(req, res)
 	let s_close_period = sanitize_date(req.query.close_period);
 
 	await run_query(`delete from cf_compiled_scf where access_slug=? and open_period=? and close_period=?`,[req.query.access_slug, req.query.open_period, req.query.close_period]);
-    await run_query(`delete from cf_compiled_scf where open_period > close_period`);
+    	await run_query(`delete from cf_compiled_scf where open_period > close_period`);
 
 
 	//### NET INCOME
@@ -1019,7 +1028,7 @@ async function get_trial_balance_deltas(req, res)
 	    `;
 
 	let [ni_close] = await run_query(query, [req.query.access_slug, req.query.close_period]);
-    let [ni_open] = await run_query(query, [req.query.access_slug, req.query.open_period]);
+    	let [ni_open] = await run_query(query, [req.query.access_slug, req.query.open_period]);
 
 	let net_income = ni_close[0].net_income  - ni_open[0].net_income;
 
@@ -1241,12 +1250,11 @@ async function insert_compiled_scf( access_slug, open_period, close_period, scf_
 {
 
         await run_query(`insert into cf_compiled_scf (access_slug, open_period, close_period, caption_section, caption_description, line_value) values (?, ?, ?, ?, ?, ?)`,
-			[access_slug, open_period, close_period, scf_section, scf_caption, line_value]);
+		[access_slug, open_period, close_period, scf_section, scf_caption, line_value]);
 
 }
 
 
-//if($ps->{upload_type} eq "trial_balance_coding")
 async function save_trial_balance_coding(req, res, file_name)
 {
 
@@ -1321,7 +1329,6 @@ async function save_trial_balance(req, res, file_name)
 async function insert_trial_balance_records(req, res, trial_balance)
 {
 
-
  	let query = `select account_caption from cf_trial_balance_mapping where access_slug=?`;
 	let [results] = await run_query(query, [req.body.access_slug]);
 
@@ -1338,11 +1345,9 @@ async function insert_trial_balance_records(req, res, trial_balance)
 
 	for( r in trial_balance)
 	{
-
 		//skip blank lines
 		if( /^$/ig.test(trial_balance[r].account_caption ) )
 			continue;
-
 
 		row.debit = row.debit.replace(/"/g, '');
 		row.debit = row.debit.replace(/'/g, '');
@@ -1407,6 +1412,7 @@ async function view_tb(req, res)
 
 	let s_open_period = sanitize_date(req.query.open_period);
 	let s_close_period = sanitize_date(req.query.close_period);
+	//TODO: move this to template
 	let main_content = `
 	<title>Trial Balances</title>
 	<script src="csv.js"></script>
@@ -1582,7 +1588,7 @@ async function insert_from_backup(req, res, data)
 	await run_query(`delete from cf_trial_balance_mapping where access_slug=?`,[req.body.access_slug]);
 	await run_query(`delete from cf_reconciliation_notes where access_slug=?`,[req.body.access_slug]);
 
-    //### CASHFLOW CAPTIONS
+    	//### CASHFLOW CAPTIONS
 
 	let query = `insert into statement_of_cashflows (caption_description, section_type, access_slug) values (?, ?, ?)`;
 	let original_cashflow_caption_ids = {};
@@ -1626,7 +1632,7 @@ async function insert_from_backup(req, res, data)
 	{
 		account_ids[results[i].account_caption] = results[i].id;
 	}
-    //### REC TABLE
+    	//### REC TABLE
 	query = `insert into cf_rec_table (cashflow_caption_id, open_period, close_period, rec_value, account_id, access_slug) values (?, ?, ?, ?, ?, ?)`;
 	for( i in json['rec_table'] )
 	{
@@ -1713,7 +1719,8 @@ async function run_query(query, inputs, c_aller, request_description)
 		
 		results = await db.execute(query, inputs);
 	} catch(e) {
-		//await db.execute(`insert into error_log (caller, request_description, stack_error, error_timestamp, inputs, query) values (?, ?, ?, now(), ?, ?)`, [c_aller, request_description, e.toString(), inputs, query]);
+		//await db.execute(`insert into error_log (caller, request_description, stack_error, error_timestamp, inputs, query) values (?, ?, ?, now(), ?, ?)`, 
+		//	[c_aller, request_description, e.toString(), inputs, query]);
 		console.log(e);
 		console.log(inputs);
 	}
