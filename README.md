@@ -37,7 +37,7 @@ Set SaaS95 user credentials and initialize the database:
 ```console
 $ mysql saas95 -u root -p
 Enter Password: ******
-mysql> GRANT ALL PRIVILEGES ON saas95.* TO 'me'@localhost IDENTIFIED BY 'my_password';
+mysql> GRANT ALL PRIVILEGES ON saas95.* TO 'made_up_user_name'@localhost IDENTIFIED BY 'my_password';
 mysql>\. mysql_schema.sql
 ```
 
@@ -51,7 +51,7 @@ Open up configs.js in your text editor (notepad, textedit, etc.) and update it t
 ```js
 const host = 'localhost';
 const database = 'saas95'; // set to the databse you created
-const user = 'me'; //should match what you set above
+const user = 'made_up_user_name'; //should match what you set above
 const password = 'my_password'; //should match what you set above.
 
 
