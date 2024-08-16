@@ -8,7 +8,7 @@
     "app": "nodemon app.js",
     "mysqlv": "mysql --version"
   },
-  "author": "",
+  "author": "Caleb Stephens",
   "license": "CC-BY-NC 4.0",
   "dependencies": {
     "consolidate": "^1.0.3",
