@@ -14,7 +14,7 @@ function introjs_init(){
                                 },
                                 {
                                         element: document.getElementById('cf_slug'),
-                                        intro: 'Get started by putting in your access key. Don\'t have an access key? Ping us at support@saas95.com.'
+                                        intro: 'Get started by putting in your access key. You can set this to whatever you like, just remember it. Use a simple naming convension like FY26. or 3Q24.'
                                 },
                                 {
                                 title: 'Trial Balances',
