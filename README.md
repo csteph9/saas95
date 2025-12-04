@@ -66,6 +66,16 @@ $ npm run app
 SaaS95 running; view at localhost:3000/main.html
 ```
 
+# Run with Docker
+```
+# build and start app + MariaDB
+docker-compose up --build
+
+# stop stack
+docker-compose down
+```
+The compose file binds the app to `127.0.0.1:3000`, so it is only reachable from the host machine. Update the port mapping if you intentionally want LAN exposure. Environment defaults are set in `docker-compose.yml`; override them as needed (e.g., `PORT`, `SITE_URL`, `DB_*`). The MariaDB container initializes with `mysql_schema.sql` on first start and stores data in the `db_data` volume.
+
 # Start with an example
 
 See [saas95/example](https://github.com/csteph9/saas95/tree/main/example) for a test file you can test with and some UI screenshots.

@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      - PORT=3000
+      - SITE_URL=127.0.0.1
+      - DB_HOST=db
+      - DB_NAME=saas95
+      - DB_USER=saas95
+      - DB_PASSWORD=saas95pass
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      - MARIADB_ROOT_PASSWORD=rootpass
+      - MARIADB_DATABASE=saas95
+      - MARIADB_USER=saas95
+      - MARIADB_PASSWORD=saas95pass
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./mysql_schema.sql:/docker-entrypoint-initdb.d/mysql_schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpass"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  db_data:
