@@ -165,7 +165,7 @@ async function dtbc(req,res)
 	let accounts = [];
 	let ret = [];
 
-	const [results] = run_query(query, [req.query.access_slug]);
+	const [results] = await run_query(query, [req.query.access_slug]);
 
 	for ( i in results )
 	{
@@ -1270,28 +1270,26 @@ async function save_trial_balance_coding(req, res, file_name)
 	let insertQuery = `insert into cf_trial_balance_mapping (account_caption, account_type, access_slug) values (?, ?, ?)`;
 	let updateQuery = `update cf_trial_balance_mapping set account_type=? where access_slug=? and account_caption=?`;
 
-	fs.createReadStream("uploads/"+file_name).pipe(csv()).on('data', (row) => {
 
-		for( i in row )
-		{
-			//get rid of all BOM marks read in from the CSV file
-			e = i.replace(/^\uFEFF/, "");
-			row[e] = row[i];
-		}
-		if( account_list[ row['account_caption'] ] > 0 )
-		{
-			run_query(updateQuery, [row.account_type, req.body.access_slug, row.account_caption]);
-		} else {
-			run_query(insertQuery, [row.account_caption, row.account_type, req.body.access_slug]);
-		}
+	const work = [];
 
-	
-        }).on('end', () => {
-		fs.unlink("uploads/" + file_name, ()=>{});
-		res.send("Trial balance coding updated");
-	}).on('error', (err) =>{
-		console.log(err);
+	await new Promise((resolve, reject) => {
+		fs.createReadStream(`uploads/${file_name}`)
+		.pipe(csv())
+		.on('data', (row) => {
+			// normalize row...
+			const fn = accountList[row.account_caption] > 0
+			? run_query(updateQuery, [row.account_type, req.body.access_slug, row.account_caption])
+			: run_query(insertQuery, [row.account_caption, row.account_type, req.body.access_slug]);
+			work.push(fn);
+		})
+		.on('end', resolve)
+		.on('error', reject);
 	});
+
+	await Promise.all(work);
+	fs.unlink(`uploads/${file_name}`, () => {});
+	res.send("Trial balance coding updated");
 
 }
 
@@ -1477,7 +1475,7 @@ async function save_new_cashflow_captions(req, res, file_name)
 
 	let return_string = `<div style="width:30%"><table class=table><tr><td>Caption Description</td><td>Section Type</td></tr>`;
 
- 	fs.createReadStream("uploads/"+file_name).pipe(csv()).on('data', (row) => {
+ 	fs.createReadStream("uploads/"+file_name).pipe(csv()).on('data', async (row) => {
 
 		for( i in row )
 		{
@@ -1487,17 +1485,17 @@ async function save_new_cashflow_captions(req, res, file_name)
 		}
 		if( available_types[ row['section_type'] ] > 0 )
 		{
-			run_query(query, [row.caption_description, row.section_type, req.body.access_slug]);
+			await run_query(query, [row.caption_description, row.section_type, req.body.access_slug]);
 		} else {
 			//section wasn't found - by default assign it to operating reconciliation
-			run_query(query, [row.caption_description, 'operating reconciliation', req.body.access_slug]);
+			await run_query(query, [row.caption_description, 'operating reconciliation', req.body.access_slug]);
 		}
 
 		return_string += `<tr><td>${row.caption_description}</td><td align=right>${row.section_type}</td></tr>`;
 
 	}).on('end', () => {
 			fs.unlink("uploads/" + file_name, ()=>{});
-	return_string += "</table></div>";
+			return_string += "</table></div>";
 			res.send(return_string);
 	}).on('error', (err) =>{
 			console.log(err);
